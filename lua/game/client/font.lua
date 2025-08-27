@@ -10,7 +10,6 @@ if not _CLIENT then return end
 
 require( "UTIL" )
 require( "surface" )
-require( "hook" )
 
 local INVALID_FONT = INVALID_FONT
 local setmetatable = setmetatable

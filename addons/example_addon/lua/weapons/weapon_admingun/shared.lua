@@ -135,7 +135,7 @@ function SWEP:SecondaryAttack()
 	MASK_SHOT = _E.MASK.SHOT
 	UTIL.TraceLine( vecEye, vecEye + vForward * 567556, MASK_SHOT, this, 15, tr );
 	
-  local grenade = CreateEntityByName("grenade_ar2")
+  	local grenade = CreateEntityByName("grenade_ar2")
 	if grenade ~= NULL then
 		grenade.PrecacheModel( modelName )
 		grenade:SetModel( modelName )
@@ -143,8 +143,6 @@ function SWEP:SecondaryAttack()
 		grenade:SetAbsAngles( angle )
 		grenade:Spawn()
 	end
-
-end
 
 	if ( self.m_iClip1 == 0 and pPlayer:GetAmmoCount( self.m_iPrimaryAmmoType ) <= 0 ) then
 		-- HEV suit - indicate out of ammo condition

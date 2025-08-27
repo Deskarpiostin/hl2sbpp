@@ -8,7 +8,8 @@ include( "../includes/extensions/panel.lua" )
 
 local FCVAR_CLIENTDLL = _E.FCVAR.CLIENTDLL
 
-require( "concommand" )
+--require( "concommand" )
+include( "../includes/modules/concommand.lua" )
 
 local hContentDialog = INVALID_PANEL
 
@@ -26,11 +27,13 @@ local function PositionDialog(dlg)
 end
 
 local function OnOpenContentDialog()
-	if ( ToPanel( hContentDialog ) == INVALID_PANEL ) then
-		hContentDialog = vgui.CContentDialog(VGui_GetGameUIPanel(), "ContentDialog");
-		PositionDialog( hContentDialog );
-	end
-	hContentDialog:Activate();
+    if ( ToPanel( hContentDialog ) == INVALID_PANEL ) then
+        local parent = VGui_GetGameUIPanel()
+        if parent == INVALID_PANEL then parent = nil end -- <--- guard
+        hContentDialog = vgui.CContentDialog(parent, "ContentDialog")
+        PositionDialog( hContentDialog )
+    end
+    hContentDialog:Activate()
 end
 
 concommand.Create( "OpenContentDialog", OnOpenContentDialog, "Open content dialog.", FCVAR_CLIENTDLL )
