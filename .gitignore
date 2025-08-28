@@ -13,3 +13,4 @@ settings.scr
 *.ain
 graphs/
 gamestate.txt
+videoconfig_android.cfg
