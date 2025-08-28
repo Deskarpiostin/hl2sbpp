@@ -10,3 +10,5 @@ videoconfig_linux.cfg
 voice_ban.dt
 serverconfig.vdf
 settings.scr
+*.ain
+graphs/
