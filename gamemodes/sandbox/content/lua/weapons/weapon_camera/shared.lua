@@ -1,4 +1,4 @@
---========== Copyleft © 2010, Team Sandbox, Some rights reserved. ===========--
+--========== Copyleft ï¿½ 2010, Team Sandbox, Some rights reserved. ===========--
 --
 -- Purpose: Initialize the base scripted weapon.
 --
@@ -35,7 +35,6 @@ SWEP.AutoSwitchFrom			= true
 SWEP.BuiltRightHanded		= true
 SWEP.AllowFlipping			= true
 SWEP.MeleeWeapon			= true
-SWEP.UseHands				= true
 
 SWEP.m_acttable            =
 {

@@ -1,4 +1,4 @@
---========== Copyleft © 2010, Team Sandbox, Some rights reserved. ===========--
+--========== Copyleft ï¿½ 2010, Team Sandbox, Some rights reserved. ===========--
 --
 -- Purpose: Initialize the base scripted weapon.
 --
@@ -36,22 +36,16 @@ SWEP.BuiltRightHanded		= 1
 SWEP.AllowFlipping			= 1
 SWEP.MeleeWeapon			= 0
 
--- TODO; implement Activity enum library!!
-SWEP.m_acttable				=
+SWEP.m_acttable            =
 {
-	{ 1048, 977, false },
-	{ 1049, 979, false },
-
-	{ 1058, 978, false },
-	{ 1061, 980, false },
-
-	{ 1073, 981, false },
-	{ 1077, 981, false },
-
-	{ 1090, 982, false },
-	{ 1093, 982, false },
-
-	{ 1064, 983, false },
+	{ ACT_HL2MP_IDLE,					ACT_HL2MP_IDLE_PISTOL,					false },
+	{ ACT_HL2MP_RUN,					ACT_HL2MP_RUN_PISTOL,					false },
+	{ ACT_HL2MP_IDLE_CROUCH,			ACT_HL2MP_IDLE_CROUCH_PISTOL,			false },
+	{ ACT_HL2MP_WALK_CROUCH,			ACT_HL2MP_WALK_CROUCH_PISTOL,			false },
+	{ ACT_HL2MP_GESTURE_RANGE_ATTACK,	ACT_HL2MP_GESTURE_RANGE_ATTACK_PISTOL,	false },
+	{ ACT_HL2MP_GESTURE_RELOAD,			ACT_HL2MP_GESTURE_RELOAD_PISTOL,		false },
+	{ ACT_HL2MP_JUMP,					ACT_HL2MP_JUMP_PISTOL,					false },
+	{ ACT_RANGE_ATTACK1,				ACT_RANGE_ATTACK_PISTOL,				false },
 };
 
 function SWEP:Initialize()
