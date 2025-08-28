@@ -5,7 +5,7 @@
 --===========================================================================--
 
 SWEP.printname				= "CAMERA"
-SWEP.viewmodel				= "models/weapons/c_arms_animations.mdl"
+SWEP.viewmodel				= "" -- no model
 SWEP.playermodel			= ""
 SWEP.anim_prefix			= "fists"
 SWEP.bucket					= 5

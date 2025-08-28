@@ -72,7 +72,7 @@ function SWEP:PrimaryAttack()
 	local vecEye 		= pPlayer:EyePosition();
 	pPlayer:EyeVectors( vForward, vRight, vUp );
 	
-	tr = trace_t()
+	local tr = trace_t()
 	MASK_SHOT = _E.MASK.SHOT
 	UTIL.TraceLine( vecEye, vecEye + vForward * 56755, MASK_SHOT, pPlayer, 0, tr );
 

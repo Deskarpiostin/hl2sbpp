@@ -135,7 +135,7 @@ function SWEP:SecondaryAttack()
 	MASK_SHOT = _E.MASK.SHOT
 	UTIL.TraceLine( vecEye, vecEye + vForward * 567556, MASK_SHOT, this, 15, tr );
 	
-  	local grenade = CreateEntityByName("grenade_ar2")
+  	local grenade = CreateEntityByName( modelName )
 	if grenade ~= NULL then
 		grenade.PrecacheModel( modelName )
 		grenade:SetModel( modelName )
