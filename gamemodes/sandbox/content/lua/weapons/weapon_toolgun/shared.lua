@@ -4,6 +4,8 @@
 --
 --===========================================================================--
 
+include( "acttable.lua" )
+
 SWEP.printname				= "TOOLGUN"
 SWEP.viewmodel				= "models/weapons/v_pistol.mdl"
 SWEP.playermodel			= "models/weapons/w_pistol.mdl"
@@ -36,16 +38,19 @@ SWEP.BuiltRightHanded		= true
 SWEP.AllowFlipping			= true
 SWEP.MeleeWeapon			= false
 
+SWEP.DrawCrosshair = true
+SWEP.DrawAmmo = false
+
 SWEP.m_acttable            =
 {
-	{ ACT_HL2MP_IDLE,					ACT_HL2MP_IDLE_PISTOL,					false },
-	{ ACT_HL2MP_RUN,					ACT_HL2MP_RUN_PISTOL,					false },
-	{ ACT_HL2MP_IDLE_CROUCH,			ACT_HL2MP_IDLE_CROUCH_PISTOL,			false },
-	{ ACT_HL2MP_WALK_CROUCH,			ACT_HL2MP_WALK_CROUCH_PISTOL,			false },
-	{ ACT_HL2MP_GESTURE_RANGE_ATTACK,	ACT_HL2MP_GESTURE_RANGE_ATTACK_PISTOL,	false },
-	{ ACT_HL2MP_GESTURE_RELOAD,			ACT_HL2MP_GESTURE_RELOAD_PISTOL,		false },
-	{ ACT_HL2MP_JUMP,					ACT_HL2MP_JUMP_PISTOL,					false },
-	{ ACT_RANGE_ATTACK1,				ACT_RANGE_ATTACK_PISTOL,				false },
+	{ ACT.HL2MP_IDLE,					ACT.HL2MP_IDLE_PISTOL,					false },
+	{ ACT.HL2MP_RUN,					ACT.HL2MP_RUN_PISTOL,					false },
+	{ ACT.HL2MP_IDLE_CROUCH,			ACT.HL2MP_IDLE_CROUCH_PISTOL,			false },
+	{ ACT.HL2MP_WALK_CROUCH,			ACT.HL2MP_WALK_CROUCH_PISTOL,			false },
+	{ ACT.HL2MP_GESTURE_RANGE_ATTACK,	ACT.HL2MP_GESTURE_RANGE_ATTACK_PISTOL,	false },
+	{ ACT.HL2MP_GESTURE_RELOAD,			ACT.HL2MP_GESTURE_RELOAD_PISTOL,		false },
+	{ ACT.HL2MP_JUMP,					ACT.HL2MP_JUMP_PISTOL,					false },
+	{ ACT.RANGE_ATTACK1,				ACT.RANGE_ATTACK_PISTOL,				false },
 };
 
 function SWEP:Initialize()
@@ -77,13 +82,13 @@ function SWEP:PrimaryAttack()
 	UTIL.TraceLine( vecEye, vecEye + vForward * 56755, MASK_SHOT, pPlayer, 0, tr );
 
 	local pEntity = tr.m_pEnt;
-	if not pEntity then
+	if pEntity == NULL then
 		print("not an ent")
 		return false
 	end
 
 	local pBaseAnimating = pEntity:GetBaseAnimating()
-	if not pBaseAnimating then
+	if pBaseAnimating == NULL then
 		print("not an baseanimating")
 	end
 
@@ -96,6 +101,9 @@ function SWEP:PrimaryAttack()
 		pBaseAnimating:Dissolve()
 	elseif self.ToolMode == 2 then
 	elseif self.ToolMode == 3 then
+	else
+		print("how")
+		return false
 	end
 
 end

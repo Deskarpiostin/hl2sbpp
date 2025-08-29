@@ -1,8 +1,10 @@
---========== Copyleft © 2010, Team Sandbox, Some rights reserved. ===========--
+--========== Copyleft ï¿½ 2010, Team Sandbox, Some rights reserved. ===========--
 --
 -- Purpose: 
 --
 --===========================================================================--
+
+include( "acttable.lua" )
 
 SWEP.printname				= "#HL2_SMG1"
 SWEP.viewmodel				= "models/weapons/w_package.mdl"
@@ -23,14 +25,17 @@ SWEP.secondary_ammo			= "None"
 SWEP.weight					= 0
 SWEP.item_flags				= 0
 
+SWEP.DrawCrosshair = true
+SWEP.DrawAmmo = false
+
 SWEP.SoundData				=
 {
 }
 
 SWEP.m_acttable				=
 {
-	{ 1,						307,					false },
-	{ 6,						308,					false },
+	{ ACT.IDLE,						ACT.GESTURE_RANGE_ATTACK_SMG1,					false },
+	{ ACT.WALK,						ACT.GESTURE_RANGE_ATTACK_SMG1_LOW,				false },
 };
 
 -------------------------------------------------------------------------------

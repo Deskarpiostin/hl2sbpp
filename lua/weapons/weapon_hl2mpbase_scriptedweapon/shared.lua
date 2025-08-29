@@ -4,6 +4,8 @@
 --
 --===========================================================================--
 
+include( "acttable.lua" )
+
 SWEP.printname				= "#HL2_357Handgun"
 SWEP.viewmodel				= "models/weapons/v_357.mdl"
 SWEP.playermodel			= "models/weapons/w_357.mdl"
@@ -17,6 +19,9 @@ SWEP.default_clip			= 6
 SWEP.default_clip2			= -1
 SWEP.primary_ammo			= "357"
 SWEP.secondary_ammo			= "None"
+
+SWEP.DrawCrosshair = true
+SWEP.DrawAmmo = true
 
 SWEP.weight					= 7
 SWEP.item_flags				= 0
@@ -38,14 +43,14 @@ SWEP.MeleeWeapon			= 0
 
 SWEP.m_acttable            =
 {
-	{ ACT_HL2MP_IDLE,					ACT_HL2MP_IDLE_PISTOL,					false },
-	{ ACT_HL2MP_RUN,					ACT_HL2MP_RUN_PISTOL,					false },
-	{ ACT_HL2MP_IDLE_CROUCH,			ACT_HL2MP_IDLE_CROUCH_PISTOL,			false },
-	{ ACT_HL2MP_WALK_CROUCH,			ACT_HL2MP_WALK_CROUCH_PISTOL,			false },
-	{ ACT_HL2MP_GESTURE_RANGE_ATTACK,	ACT_HL2MP_GESTURE_RANGE_ATTACK_PISTOL,	false },
-	{ ACT_HL2MP_GESTURE_RELOAD,			ACT_HL2MP_GESTURE_RELOAD_PISTOL,		false },
-	{ ACT_HL2MP_JUMP,					ACT_HL2MP_JUMP_PISTOL,					false },
-	{ ACT_RANGE_ATTACK1,				ACT_RANGE_ATTACK_PISTOL,				false },
+	{ ACT.HL2MP_IDLE,					ACT.HL2MP_IDLE_PISTOL,					false },
+	{ ACT.HL2MP_RUN,					ACT.HL2MP_RUN_PISTOL,					false },
+	{ ACT.HL2MP_IDLE_CROUCH,			ACT.HL2MP_IDLE_CROUCH_PISTOL,			false },
+	{ ACT.HL2MP_WALK_CROUCH,			ACT.HL2MP_WALK_CROUCH_PISTOL,			false },
+	{ ACT.HL2MP_GESTURE_RANGE_ATTACK,	ACT.HL2MP_GESTURE_RANGE_ATTACK_PISTOL,	false },
+	{ ACT.HL2MP_GESTURE_RELOAD,			ACT.HL2MP_GESTURE_RELOAD_PISTOL,		false },
+	{ ACT.HL2MP_JUMP,					ACT.HL2MP_JUMP_PISTOL,					false },
+	{ ACT.RANGE_ATTACK1,				ACT.RANGE_ATTACK_PISTOL,				false },
 };
 
 function SWEP:Initialize()

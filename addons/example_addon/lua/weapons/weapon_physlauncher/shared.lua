@@ -1,3 +1,5 @@
+include( "acttable.lua" )
+
 SWEP.PrintName				= "BaseWeapon"
 SWEP.ViewModel				= "models/weapons/v_pistol.mdl"
 SWEP.WorldModel				= "models/weapons/w_pistol.mdl"
@@ -31,22 +33,19 @@ SWEP.BuiltRightHanded		= 1
 SWEP.AllowFlipping			= 1
 SWEP.MeleeWeapon			= 0
 
--- TODO; implement Activity enum library!!
-SWEP.m_acttable				=
+SWEP.DrawCrosshair = true
+SWEP.DrawAmmo = false
+
+SWEP.m_acttable            =
 {
-	{ 1048, 977, false },
-	{ 1049, 979, false },
-
-	{ 1058, 978, false },
-	{ 1061, 980, false },
-
-	{ 1073, 981, false },
-	{ 1077, 981, false },
-
-	{ 1090, 982, false },
-	{ 1093, 982, false },
-
-	{ 1064, 983, false },
+	{ ACT.HL2MP_IDLE,					ACT.HL2MP_IDLE_PISTOL,					false },
+	{ ACT.HL2MP_RUN,					ACT.HL2MP_RUN_PISTOL,					false },
+	{ ACT.HL2MP_IDLE_CROUCH,			ACT.HL2MP_IDLE_CROUCH_PISTOL,			false },
+	{ ACT.HL2MP_WALK_CROUCH,			ACT.HL2MP_WALK_CROUCH_PISTOL,			false },
+	{ ACT.HL2MP_GESTURE_RANGE_ATTACK,	ACT.HL2MP_GESTURE_RANGE_ATTACK_PISTOL,	false },
+	{ ACT.HL2MP_GESTURE_RELOAD,			ACT.HL2MP_GESTURE_RELOAD_PISTOL,		false },
+	{ ACT.HL2MP_JUMP,					ACT.HL2MP_JUMP_PISTOL,					false },
+	{ ACT.RANGE_ATTACK1,				ACT.RANGE_ATTACK_PISTOL,				false },
 };
 
 function SWEP:Initialize()
@@ -87,24 +86,22 @@ function SWEP:PrimaryAttack()
 	self.m_flNextPrimaryAttack = gpGlobals.curtime() + 0.10;
 	self.m_flNextSecondaryAttack = gpGlobals.curtime() + 0.75;
 
-	local vForward 		= Vector()
-	local vRight 		= Vector()
-	local vUp  			= Vector()
-	local angle 		= QAngle()
-	local vecEye 		= pPlayer:EyePosition();
-	pPlayer:EyeVectors( vForward, vRight, vUp );
+	local eye = pPlayer:EyeAngles()
+	local shootpos = pPlayer:EyePosition()
 	
-	tr = trace_t()
-	MASK_SHOT = _E.MASK.SHOT
-	UTIL.TraceLine( vecEye, vecEye + vForward * 56755, MASK_SHOT, this, 0, tr );
-
-	local prop = CreateEntityByName("prop_physics")
-	if prop ~= NULL then
-		prop.PrecacheModel( modelName )
-		prop:SetModel( modelName )
-		prop:SetLocalOrigin( tr.endpos )
-		prop:SetAbsAngles( angle )
-		prop:Spawn()
+	local forward, right, up = pPlayer:GetVectors()
+	
+	local ent = CreateEntityByName("prop_physics_multiplayer")
+	if ent ~= NULL then
+		ent.PrecacheModel( modelName ) -- @ThePixelMoon: fucker
+		ent:SetAbsOrigin( shootpos + forward * 32 )
+		ent:SetAbsAngles( eye )
+		ent:SetOwnerEntity( pPlayer )
+		ent:SetModel( modelName )
+		ent:Spawn()
+		ent:Activate()
+		
+		ent:SetAbsVelocity(forward * 2000)
 	end
 
 	if ( self.m_iClip1 == 0 and pPlayer:GetAmmoCount( self.m_iPrimaryAmmoType ) <= 0 ) then

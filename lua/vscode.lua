@@ -1845,7 +1845,16 @@ IPhysicsObject = {}
 EmitSound_t = {}
 
 ---@class CSoundParameters
-CSoundParameters = {}
+---@field channel integer # The sound channel (e.g., CHAN_STATIC, CHAN_VOICE)
+---@field volume number # Volume multiplier (0.0–1.0, but can exceed 1.0 for amplification)
+---@field pitch integer # Default pitch (100 = normal, <100 = lower, >100 = higher)
+---@field pitchlow integer # Minimum randomized pitch value
+---@field pitchhigh integer # Maximum randomized pitch value
+---@field soundlevel integer # Attenuation / sound level (see soundlevel_t enum)
+---@field play_to_owner_only boolean # If true, only the owner hears the sound
+---@field count integer # Number of sounds available (for randomization)
+---@field soundname string # Name/path of the sound file
+---@field delay_msec integer # Delay before playback in milliseconds
 
 ---@class FireBulletsInfo
 FireBulletsInfo = {}
@@ -3720,6 +3729,114 @@ function CBaseCombatWeapon.__eq(a, b) end
 ---@return string
 function CBaseCombatWeapon.__tostring() end
 
+---@class debugoverlay
+debugoverlay = {}
+
+--- Draws a 3D box overlay in the world.
+---@param origin Vector # Center of the box
+---@param mins Vector # Minimum extents (local space)
+---@param maxs Vector # Maximum extents (local space)
+---@param angles QAngle # Box rotation
+---@param r integer # Red (0–255)
+---@param g integer # Green (0–255)
+---@param b integer # Blue (0–255)
+---@param a integer # Alpha (0–255)
+---@param duration number # Duration in seconds
+function debugoverlay.AddBoxOverlay(origin, mins, maxs, angles, r, g, b, a, duration) end
+
+
+--- Draws a 3D box overlay with per-corner colors.
+---@param origin Vector
+---@param mins Vector
+---@param maxs Vector
+---@param angles QAngle
+---@param faceColor Color # Face color (RGBA)
+---@param edgeColor Color # Edge color (RGBA)
+---@param duration number
+function debugoverlay.AddBoxOverlay2(origin, mins, maxs, angles, faceColor, edgeColor, duration) end
+
+
+--- Adds a grid overlay at the given position.
+---@param origin Vector
+function debugoverlay.AddGridOverlay(origin) end
+
+
+--- Draws a 3D line overlay.
+---@param startPos Vector
+---@param endPos Vector
+---@param r integer
+---@param g integer
+---@param b integer
+---@param noDepthTest boolean # If true, ignores depth buffer
+---@param duration number
+function debugoverlay.AddLineOverlay(startPos, endPos, r, g, b, noDepthTest, duration) end
+
+
+--- Draws a 3D line overlay with alpha support.
+---@param startPos Vector
+---@param endPos Vector
+---@param r integer
+---@param g integer
+---@param b integer
+---@param a integer
+---@param noDepthTest boolean
+---@param duration number
+function debugoverlay.AddLineOverlayAlpha(startPos, endPos, r, g, b, a, noDepthTest, duration) end
+
+
+--- Adds a screen-space text overlay.
+---@param x number # X position (0–1 normalized or pixels depending on engine)
+---@param y number # Y position
+---@param line number # Text line index
+---@param r integer
+---@param g integer
+---@param b integer
+---@param centered boolean
+---@param text string
+function debugoverlay.AddScreenTextOverlay(x, y, line, r, g, b, centered, text) end
+
+
+--- Adds a swept box overlay (moving box).
+---@param start Vector # Start position
+---@param endPos Vector # End position
+---@param mins Vector
+---@param maxs Vector
+---@param angles QAngle
+---@param r integer
+---@param g integer
+---@param b integer
+---@param a integer
+---@param duration number
+function debugoverlay.AddSweptBoxOverlay(start, endPos, mins, maxs, angles, r, g, b, a, duration) end
+
+
+--- Draws a triangle overlay.
+---@param p1 Vector
+---@param p2 Vector
+---@param p3 Vector
+---@param r integer
+---@param g integer
+---@param b integer
+---@param a integer
+---@param noDepthTest boolean
+---@param duration number
+function debugoverlay.AddTriangleOverlay(p1, p2, p3, r, g, b, a, noDepthTest, duration) end
+
+
+--- Removes all active overlays.
+function debugoverlay.ClearAllOverlays() end
+
+
+--- Removes overlays that have expired.
+function debugoverlay.ClearDeadOverlays() end
+
+
+--- Converts a 3D world position to 2D screen coordinates.
+---@param worldPos Vector # Input world position
+---@param screenPos Vector # Output screen position
+---@return integer # 0 on success, non-zero if off-screen
+function debugoverlay.ScreenPosition(worldPos, screenPos) end
+
 --- Debugging library providing functions for logging and spew control.
 --- @class dbg
 dbg = {}
@@ -4614,17 +4731,17 @@ function CBaseAnimating:__tostring() end
 --- @class ENT : CBaseAnimating
 ENT = {}
 
----@class effect
+---@class Effects
 ---Library for creating game effects like explosions and dissolves.
-effect = {}
+Effects = {}
 
----Dissolves an entity with a specific effect.
+---Dissolves an entity with a specific Effects.
 ---@param entity any The entity to dissolve.
----@param effectName string The name of the dissolve effect.
----@param life float Duration of the dissolve in seconds.
+---@param effectName string The name of the dissolve Effects.
+---@param life number Duration of the dissolve in seconds.
 ---@param flags integer Flags controlling dissolve behavior.
 ---@return any The created dissolve entity.
-function effect.Dissolve(entity, effectName, life, flags) end
+function Effects.Dissolve(entity, effectName, life, flags) end
 
 ---Creates an explosion at a given position.
 ---@param position table Vector `{x, y, z}` for the explosion location.
@@ -4634,9 +4751,9 @@ function effect.Dissolve(entity, effectName, life, flags) end
 ---@param radius integer Explosion radius.
 ---@param doDamage boolean Whether the explosion deals damage.
 ---@param ignoreLOS? boolean Optional. If true, ignores line-of-sight checks. Default: false
----@param customEffect? boolean Optional. If true, uses a custom visual effect. Default: false
+---@param customEffect? boolean Optional. If true, uses a custom visual Effects. Default: false
 ---@param soundType? integer Optional. Type of explosion sound. Default: -1
-function effect.ExplosionCreate(position, angle, owner, magnitude, radius, doDamage, ignoreLOS, customEffect, soundType) end
+function Effects.ExplosionCreate(position, angle, owner, magnitude, radius, doDamage, ignoreLOS, customEffect, soundType) end
 
 ---@class IN
 ---Input actions, corresponding to engine key/button flags.
@@ -5464,1638 +5581,2435 @@ function input.WasMouseReleased(button)
     return false
 end
 
--- global NULL value
+--- Mouse code enum (use as number in Lua).
+--- @alias MouseCode number
+
+--- Key code enum (use as number in Lua).
+--- @alias KeyCode number
+
+--- Activation type enum for buttons (use as number in Lua).
+--- @alias ActivationType number
+
+--- Scheme handle (HScheme in C++, number/userdata in Lua).
+--- @alias HScheme number
+
+--- Font handle (HFont in C++, number/userdata in Lua).
+--- @alias HFont number
+
+--- VPanel handle (VPANEL in C++, userdata in Lua).
+--- @alias VPanel any
+
+--- Pin corner enum for panels.
+--- @alias PinCorner number
+
+--- Auto resize enum for panels.
+--- @alias AutoResize number
+
+--- Font draw type enum.
+--- @alias FontDrawType number
+
+--- Surface feature enum.
+--- @alias SurfaceFeature number
+
+--- Panel handle (VPANEL in C++, userdata in Lua).
+--- @class Panel
+local Panel = {}
+
+--- Called when the screen size changes.
+--- @param oldWide number Old screen width.
+--- @param oldTall number Old screen height.
+function Panel:OnScreenSizeChanged(oldWide, oldTall) end
+
+--- Paints the border of the panel.
+function Panel:PaintBorder() end
+
+--- Paints the background of the panel.
+function Panel:PaintBackground() end
+
+--- Paints the main content of the panel.
+function Panel:Paint() end
+
+--- Paints after children have been painted.
+function Panel:PostChildPaint() end
+
+--- Paints a build-mode overlay (e.g., black rectangle around panel).
+function Panel:PaintBuildOverlay() end
+
+--- Called when a child panel is added.
+--- @param child Panel The added child panel.
+function Panel:OnChildAdded(child) end
+
+--- Called when the panel's size changes.
+--- @param newWide number New width.
+--- @param newTall number New height.
+function Panel:OnSizeChanged(newWide, newTall) end
+
+--- Called every frame when the panel is visible.
+function Panel:OnThink() end
+
+--- Called when the cursor moves over the panel.
+--- @param x number Cursor X position.
+--- @param y number Cursor Y position.
+function Panel:OnCursorMoved(x, y) end
+
+--- Called when the cursor enters the panel.
+function Panel:OnCursorEntered() end
+
+--- Called when the cursor exits the panel.
+function Panel:OnCursorExited() end
+
+--- Called when a mouse button is pressed.
+--- @param code MouseCode The mouse button code.
+function Panel:OnMousePressed(code) end
+
+--- Called when a mouse button is double-pressed.
+--- @param code MouseCode The mouse button code.
+function Panel:OnMouseDoublePressed(code) end
+
+--- Called when a mouse button is triple-pressed.
+--- @param code MouseCode The mouse button code.
+function Panel:OnMouseTriplePressed(code) end
+
+--- Called when a mouse button is released.
+--- @param code MouseCode The mouse button code.
+function Panel:OnMouseReleased(code) end
+
+--- Called when the mouse wheel is scrolled.
+--- @param delta number Scroll delta (positive/negative).
+function Panel:OnMouseWheeled(delta) end
+
+--- Called when a key is pressed.
+--- @param code KeyCode The key code.
+function Panel:OnKeyCodePressed(code) end
+
+--- Called when a key is typed (including repeats).
+--- @param code KeyCode The key code.
+function Panel:OnKeyCodeTyped(code) end
+
+--- Called when a key is released.
+--- @param code KeyCode The key code.
+function Panel:OnKeyCodeReleased(code) end
+
+--- Called every frame while the panel has key focus.
+function Panel:OnKeyFocusTicked() end
+
+--- Called every frame while the panel has mouse focus.
+function Panel:OnMouseFocusTicked() end
+
+--- Called when focus is requested.
+--- @param subFocus Panel The sub-panel requesting focus.
+--- @param defaultPanel Panel The default panel to focus.
+function Panel:OnRequestFocus(subFocus, defaultPanel) end
+
+--- Called when mouse capture is lost.
+function Panel:OnMouseCaptureLost() end
+
+--- Performs layout on the panel.
+function Panel:PerformLayout() end
+
+--- Called when a command is received from another panel.
+--- @param command string The command string.
+function Panel:OnCommand(command) end
+
+--- Called when the panel gains focus.
+function Panel:OnSetFocus() end
+
+--- Called when the panel loses focus.
+function Panel:OnKillFocus() end
+
+--- Applies scheme settings to the panel.
+--- @param pScheme any The scheme object (IScheme in C++).
+function Panel:ApplySchemeSettings(pScheme) end
+
+--- Applies settings from resource data.
+--- @param inResourceData KeyValues The resource data.
+function Panel:ApplySettings(inResourceData) end
+
+--- Called when the panel moves.
+function Panel:OnMove() end
+
+--- Called every tick (frame).
+function Panel:OnTick() end
+
+--- Handles a message from another panel.
+--- @param params KeyValues The message parameters.
+--- @param ifromPanel Panel The sending panel.
+function Panel:OnMessage(params, ifromPanel) end
+
+--- Called when the panel is deleted.
+function Panel:OnDelete() end
+
+--- Adds a key binding.
+--- @param binding string The binding.
+--- @param key number Key code.
+--- @param modifier number Modifier.
+function Panel:AddKeyBinding(binding, key, modifier) end
+
+--- Adds an action signal target.
+--- @param target Panel The target panel.
+function Panel:AddActionSignalTarget(target) end
+
+--- Checks if can start dragging.
+--- @param x1 number X1.
+--- @param y1 number Y1.
+--- @param x2 number X2.
+--- @param y2 number Y2.
+--- @return boolean
+function Panel:CanStartDragging(x1, y1, x2, y2) end
+
+--- Chains to animation map.
+function Panel:ChainToAnimationMap() end
+
+--- Chains to map.
+function Panel:ChainToMap() end
+
+--- Deletes the panel.
+function Panel:DeletePanel() end
+
+--- Disables mouse input for this panel.
+--- @param disable boolean Whether to disable.
+function Panel:DisableMouseInputForThisPanel(disable) end
+
+--- Draws a box.
+--- @param x number X.
+--- @param y number Y.
+--- @param wide number Width.
+--- @param tall number Height.
+--- @param color Color The color.
+--- @param alpha number Alpha.
+--- @param unknown boolean? Unknown param.
+function Panel:DrawBox(x, y, wide, tall, color, alpha, unknown) end
+
+--- Draws a box fade.
+--- @param x number X.
+--- @param y number Y.
+--- @param wide number Width.
+--- @param tall number Height.
+--- @param color Color The color.
+--- @param alpha number Alpha.
+--- @param startAlpha number Start alpha.
+--- @param endAlpha number End alpha.
+--- @param horizontal boolean Horizontal fade.
+--- @param unknown boolean? Unknown param.
+function Panel:DrawBoxFade(x, y, wide, tall, color, alpha, startAlpha, endAlpha, horizontal, unknown) end
+
+--- Draws a hollow box.
+--- @param x number X.
+--- @param y number Y.
+--- @param wide number Width.
+--- @param tall number Height.
+--- @param color Color The color.
+--- @param alpha number Alpha.
+function Panel:DrawHollowBox(x, y, wide, tall, color, alpha) end
+
+--- Draws a textured box.
+--- @param x number X.
+--- @param y number Y.
+--- @param wide number Width.
+--- @param tall number Height.
+--- @param color Color The color.
+--- @param alpha number Alpha.
+function Panel:DrawTexturedBox(x, y, wide, tall, color, alpha) end
+
+--- Edits key bindings.
+function Panel:EditKeyBindings() end
+
+--- Fills rect skipping panel.
+--- @param color Color The color.
+--- @param x number X.
+--- @param y number Y.
+--- @param wide number Width.
+--- @param tall number Height.
+--- @param skip Panel Panel to skip.
+function Panel:FillRectSkippingPanel(color, x, y, wide, tall, skip) end
+
+--- Finds child by name.
+--- @param name string Name.
+--- @param recursive boolean? Recursive search.
+--- @return Panel
+function Panel:FindChildByName(name, recursive) end
+
+--- Finds child index by name.
+--- @param name string Name.
+--- @return number
+function Panel:FindChildIndexByName(name) end
+
+--- Finds sibling by name.
+--- @param name string Name.
+--- @return Panel
+function Panel:FindSiblingByName(name) end
+
+--- Gets alpha.
+--- @return number
+function Panel:GetAlpha() end
+
+--- Gets background color.
+--- @return Color
+function Panel:GetBgColor() end
+
+--- Gets bounds.
+--- @return number, number, number, number x, y, wide, tall
+function Panel:GetBounds() end
+
+--- Gets child panel.
+--- @param index number Index.
+--- @return Panel
+function Panel:GetChild(index) end
+
+--- Gets child count.
+--- @return number
+function Panel:GetChildCount() end
+
+--- Gets class name.
+--- @return string
+function Panel:GetClassName() end
+
+--- Gets clip rect.
+--- @return number, number, number, number x0, y0, x1, y1
+function Panel:GetClipRect() end
+
+--- Gets corner texture size.
+--- @return number, number w, h
+function Panel:GetCornerTextureSize() end
+
+--- Gets description.
+--- @return string
+function Panel:GetDescription() end
+
+--- Gets drag frame color.
+--- @return Color
+function Panel:GetDragFrameColor() end
+
+--- Gets drag panel.
+--- @return Panel
+function Panel:GetDragPanel() end
+
+--- Gets drag start tolerance.
+--- @return number
+function Panel:GetDragStartTolerance() end
+
+--- Gets drop frame color.
+--- @return Color
+function Panel:GetDropFrameColor() end
+
+--- Gets foreground color.
+--- @return Color
+function Panel:GetFgColor() end
+
+--- Gets inset.
+--- @return number, number, number, number left, top, right, bottom
+function Panel:GetInset() end
+
+--- Gets key bindings file.
+--- @return string
+function Panel:GetKeyBindingsFile() end
+
+--- Gets key bindings file path ID.
+--- @return string
+function Panel:GetKeyBindingsFilePathID() end
+
+--- Gets key mapping count.
+--- @return number
+function Panel:GetKeyMappingCount() end
+
+--- Gets minimum size.
+--- @return number, number wide, tall
+function Panel:GetMinimumSize() end
+
+--- Gets module name.
+--- @return string
+function Panel:GetModuleName() end
+
+--- Gets name.
+--- @return string
+function Panel:GetName() end
+
+--- Gets paint background type.
+--- @return number
+function Panel:GetPaintBackgroundType() end
+
+--- Gets paint size.
+--- @return number, number wide, tall
+function Panel:GetPaintSize() end
+
+--- Gets panel base class name.
+--- @return string
+function Panel:GetPanelBaseClassName() end
+
+--- Gets panel class name.
+--- @return string
+function Panel:GetPanelClassName() end
+
+--- Gets parent.
+--- @return Panel
+function Panel:GetParent() end
+
+--- Gets pin corner.
+--- @return number
+function Panel:GetPinCorner() end
+
+--- Gets pin offset.
+--- @return number, number dx, dy
+function Panel:GetPinOffset() end
+
+--- Gets position.
+--- @return number, number x, y
+function Panel:GetPos() end
+
+--- Gets reference table (Lua-specific).
+--- @return table|nil
+function Panel:GetRefTable() end
+
+--- Gets resize offset.
+--- @return number, number dx, dy
+function Panel:GetResizeOffset() end
+
+--- Gets size.
+--- @return number, number wide, tall
+function Panel:GetSize() end
+
+--- Gets tab position.
+--- @return number
+function Panel:GetTabPosition() end
+
+--- Gets tall.
+--- @return number
+function Panel:GetTall() end
+
+--- Gets VPanel.
+--- @return VPanel
+function Panel:GetVPanel() end
+
+--- Gets VParent.
+--- @return VPanel
+function Panel:GetVParent() end
+
+--- Gets wide.
+--- @return number
+function Panel:GetWide() end
+
+--- Gets Z position.
+--- @return number
+function Panel:GetZPos() end
+
+--- Checks if has focus.
+--- @return boolean
+function Panel:HasFocus() end
+
+--- Checks if has user config settings.
+--- @return boolean
+function Panel:HasUserConfigSettings() end
+
+--- Initializes property converters.
+function Panel:InitPropertyConverters() end
+
+--- Invalidates layout.
+--- @param force boolean? Force.
+--- @param immediate boolean? Immediate.
+function Panel:InvalidateLayout(force, immediate) end
+
+--- Checks if auto delete set.
+--- @return boolean
+function Panel:IsAutoDeleteSet() end
+
+--- Checks if being dragged.
+--- @return boolean
+function Panel:IsBeingDragged() end
+
+--- Checks if blocking drag chaining.
+--- @return boolean
+function Panel:IsBlockingDragChaining() end
+
+--- Checks if bottom aligned.
+--- @return boolean
+function Panel:IsBottomAligned() end
+
+--- Checks if build group enabled.
+--- @return boolean
+function Panel:IsBuildGroupEnabled() end
+
+--- Checks if build mode active.
+--- @return boolean
+function Panel:IsBuildModeActive() end
+
+--- Checks if build mode deletable.
+--- @return boolean
+function Panel:IsBuildModeDeletable() end
+
+--- Checks if build mode editable.
+--- @return boolean
+function Panel:IsBuildModeEditable() end
+
+--- Checks if child of modal sub tree.
+--- @return boolean
+function Panel:IsChildOfModalSubTree() end
+
+--- Checks if child of surface modal panel.
+--- @return boolean
+function Panel:IsChildOfSurfaceModalPanel() end
+
+--- Checks if cursor none.
+--- @return boolean
+function Panel:IsCursorNone() end
+
+--- Checks if cursor over.
+--- @return boolean
+function Panel:IsCursorOver() end
+
+--- Checks if drag enabled.
+--- @return boolean
+function Panel:IsDragEnabled() end
+
+--- Checks if drop enabled.
+--- @return boolean
+function Panel:IsDropEnabled() end
+
+--- Checks if enabled.
+--- @return boolean
+function Panel:IsEnabled() end
+
+--- Checks if key binding chain to parent allowed.
+--- @return boolean
+function Panel:IsKeyBindingChainToParentAllowed() end
+
+--- Checks if keyboard input enabled.
+--- @return boolean
+function Panel:IsKeyBoardInputEnabled() end
+
+--- Checks if key overridden.
+--- @param code KeyCode Code.
+--- @param modifier number Modifier.
+--- @return boolean
+function Panel:IsKeyOverridden(code, modifier) end
+
+--- Checks if key rebound.
+--- @param code KeyCode Code.
+--- @param modifier number Modifier.
+--- @return boolean
+function Panel:IsKeyRebound(code, modifier) end
+
+--- Checks if layout invalid.
+--- @return boolean
+function Panel:IsLayoutInvalid() end
+
+--- Checks if mouse input disabled for this panel.
+--- @return boolean
+function Panel:IsMouseInputDisabledForThisPanel() end
+
+--- Checks if mouse input enabled.
+--- @return boolean
+function Panel:IsMouseInputEnabled() end
+
+--- Checks if opaque.
+--- @return boolean
+function Panel:IsOpaque() end
+
+--- Checks if popup.
+--- @return boolean
+function Panel:IsPopup() end
+
+--- Checks if proportional.
+--- @return boolean
+function Panel:IsProportional() end
+
+--- Checks if right aligned.
+--- @return boolean
+function Panel:IsRightAligned() end
+
+--- Checks if start drag when mouse exits panel.
+--- @return boolean
+function Panel:IsStartDragWhenMouseExitsPanel() end
+
+--- Checks if triple press allowed.
+--- @return boolean
+function Panel:IsTriplePressAllowed() end
+
+--- Checks if valid key bindings context.
+--- @return boolean
+function Panel:IsValidKeyBindingsContext() end
+
+--- Checks if visible.
+--- @return boolean
+function Panel:IsVisible() end
+
+--- Checks if within.
+--- @param x number X.
+--- @param y number Y.
+--- @return boolean
+function Panel:IsWithin(x, y) end
+
+--- Checks if within traverse.
+--- @param x number X.
+--- @param y number Y.
+--- @param unknown boolean Unknown.
+--- @return boolean
+function Panel:IsWithinTraverse(x, y, unknown) end
+
+--- Adds bound key (KB_ prefix likely keyboard).
+--- @param key string Key.
+--- @param code number Code.
+--- @param modifier number Modifier.
+function Panel:KB_AddBoundKey(key, code, modifier) end
+
+--- Chains keyboard to map.
+function Panel:KB_ChainToMap() end
+
+--- Converts key code to string.
+--- @param code KeyCode Code.
+--- @return string
+function Panel:KeyCodeToString(code) end
+
+--- Converts local to screen.
+--- @return number, number x, y
+function Panel:LocalToScreen() end
+
+--- Makes popup.
+--- @param unknown1 boolean? Unknown.
+--- @param unknown2 boolean? Unknown.
+function Panel:MakePopup(unknown1, unknown2) end
+
+--- Makes ready for use.
+function Panel:MakeReadyForUse() end
+
+--- Marks for deletion.
+function Panel:MarkForDeletion() end
+
+--- Moves to front.
+function Panel:MoveToFront() end
+
+--- Called on command.
+--- @param command string Command.
+function Panel:OnCommand(command) end
+
+--- Called on cursor entered.
+function Panel:OnCursorEntered() end
+
+--- Called on cursor exited.
+function Panel:OnCursorExited() end
+
+--- Called on cursor moved.
+--- @param x number X.
+--- @param y number Y.
+function Panel:OnCursorMoved(x, y) end
+
+--- Called on delete.
+function Panel:OnDelete() end
+
+--- Called on draggable panel paint.
+function Panel:OnDraggablePanelPaint() end
+
+--- Called on key code pressed.
+--- @param code KeyCode Code.
+function Panel:OnKeyCodePressed(code) end
+
+--- Called on key code typed.
+--- @param code KeyCode Code.
+function Panel:OnKeyCodeTyped(code) end
+
+--- Called on key focus ticked.
+function Panel:OnKeyFocusTicked() end
+
+--- Called on kill focus.
+function Panel:OnKillFocus() end
+
+--- Called on mouse capture lost.
+function Panel:OnMouseCaptureLost() end
+
+--- Called on mouse double pressed.
+--- @param code MouseCode Code.
+function Panel:OnMouseDoublePressed(code) end
+
+--- Called on mouse focus ticked.
+function Panel:OnMouseFocusTicked() end
+
+--- Called on mouse pressed.
+--- @param code MouseCode Code.
+function Panel:OnMousePressed(code) end
+
+--- Called on mouse released.
+--- @param code MouseCode Code.
+function Panel:OnMouseReleased(code) end
+
+--- Called on mouse triple pressed.
+--- @param code MouseCode Code.
+function Panel:OnMouseTriplePressed(code) end
+
+--- Called on mouse wheeled.
+--- @param delta number Delta.
+function Panel:OnMouseWheeled(delta) end
+
+--- Called on move.
+function Panel:OnMove() end
+
+--- Called on set focus.
+function Panel:OnSetFocus() end
+
+--- Called on size changed.
+--- @param wide number Wide.
+--- @param tall number Tall.
+function Panel:OnSizeChanged(wide, tall) end
+
+--- Called on think.
+function Panel:OnThink() end
+
+--- Called on tick.
+function Panel:OnTick() end
+
+--- Paints the panel.
+function Panel:Paint() end
+
+--- Paints background.
+function Panel:PaintBackground() end
+
+--- Paints border.
+function Panel:PaintBorder() end
+
+--- Paints build overlay.
+function Panel:PaintBuildOverlay() end
+
+--- Converts parent local to screen.
+--- @return number, number x, y
+function Panel:ParentLocalToScreen() end
+
+--- Performs layout.
+function Panel:PerformLayout() end
+
+--- Paints post child.
+function Panel:PostChildPaint() end
+
+--- Reloads key bindings.
+function Panel:ReloadKeyBindings() end
+
+--- Removes action signal target.
+--- @param target Panel Target.
+function Panel:RemoveActionSignalTarget(target) end
+
+--- Removes all key bindings.
+function Panel:RemoveAllKeyBindings() end
+
+--- Repaints.
+function Panel:Repaint() end
+
+--- Requests focus.
+--- @param unknown number? Unknown.
+function Panel:RequestFocus(unknown) end
+
+--- Reverts key bindings to default.
+function Panel:RevertKeyBindingsToDefault() end
+
+--- Converts screen to local.
+--- @return number, number x, y
+function Panel:ScreenToLocal() end
+
+--- Sets allow key binding chain to parent.
+--- @param allow boolean Allow.
+function Panel:SetAllowKeyBindingChainToParent(allow) end
+
+--- Sets alpha.
+--- @param alpha number Alpha.
+function Panel:SetAlpha(alpha) end
+
+--- Sets auto delete.
+--- @param auto boolean Auto.
+function Panel:SetAutoDelete(auto) end
+
+--- Sets auto resize.
+--- @param pin PinCorner Pin corner.
+--- @param resize AutoResize Resize.
+--- @param minWide number Min wide.
+--- @param minTall number Min tall.
+--- @param maxWide number Max wide.
+--- @param maxTall number Max tall.
+function Panel:SetAutoResize(pin, resize, minWide, minTall, maxWide, maxTall) end
+
+--- Sets background color.
+--- @param color Color Color.
+function Panel:SetBgColor(color) end
+
+--- Sets block drag chaining.
+--- @param block boolean Block.
+function Panel:SetBlockDragChaining(block) end
+
+--- Sets bounds.
+--- @param x number X.
+--- @param y number Y.
+--- @param wide number Wide.
+--- @param tall number Tall.
+function Panel:SetBounds(x, y, wide, tall) end
+
+--- Sets build mode deletable.
+--- @param deletable boolean Deletable.
+function Panel:SetBuildModeDeletable(deletable) end
+
+--- Sets build mode editable.
+--- @param editable boolean Editable.
+function Panel:SetBuildModeEditable(editable) end
+
+--- Sets drag enabled.
+--- @param enabled boolean Enabled.
+function Panel:SetDragEnabled(enabled) end
+
+--- Sets drag start tolerance.
+--- @param tolerance number Tolerance.
+function Panel:SetDragSTartTolerance(tolerance) end
+
+--- Sets drop enabled.
+--- @param enabled boolean Enabled.
+--- @param unknown number? Unknown.
+function Panel:SetDropEnabled(enabled, unknown) end
+
+--- Sets enabled.
+--- @param enabled boolean Enabled.
+function Panel:SetEnabled(enabled) end
+
+--- Sets foreground color.
+--- @param color Color Color.
+function Panel:SetFgColor(color) end
+
+--- Sets keyboard input enabled.
+--- @param enabled boolean Enabled.
+function Panel:SetKeyBoardInputEnabled(enabled) end
+
+--- Sets minimum size.
+--- @param wide number Wide.
+--- @param tall number Tall.
+function Panel:SetMinimumSize(wide, tall) end
+
+--- Sets mouse input enabled.
+--- @param enabled boolean Enabled.
+function Panel:SetMouseInputEnabled(enabled) end
+
+--- Sets name.
+--- @param name string Name.
+function Panel:SetName(name) end
+
+--- Sets paint background enabled.
+--- @param enabled boolean Enabled.
+function Panel:SetPaintBackgroundEnabled(enabled) end
+
+--- Sets paint background type.
+--- @param type number Type.
+function Panel:SetPaintBackgroundType(type) end
+
+--- Sets paint border enabled.
+--- @param enabled boolean Enabled.
+function Panel:SetPaintBorderEnabled(enabled) end
+
+--- Sets paint enabled.
+--- @param enabled boolean Enabled.
+function Panel:SetPaintEnabled(enabled) end
+
+--- Sets parent.
+--- @param parent Panel Parent.
+function Panel:SetParent(parent) end
+
+--- Sets pin corner.
+--- @param corner PinCorner Corner.
+--- @param x number X.
+--- @param y number Y.
+function Panel:SetPinCorner(corner, x, y) end
+
+--- Sets position.
+--- @param x number X.
+--- @param y number Y.
+function Panel:SetPos(x, y) end
+
+--- Sets post child paint enabled.
+--- @param enabled boolean Enabled.
+function Panel:SetPostChildPaintEnabled(enabled) end
+
+--- Sets proportional.
+--- @param prop boolean Proportional.
+function Panel:SetProportional(prop) end
+
+--- Sets scheme.
+--- @param scheme string Scheme.
+function Panel:SetScheme(scheme) end
+
+--- Sets silent mode.
+--- @param silent boolean Silent.
+function Panel:SetSilentMode(silent) end
+
+--- Sets size.
+--- @param wide number Wide.
+--- @param tall number Tall.
+function Panel:SetSize(wide, tall) end
+
+--- Sets skip child during painting.
+--- @param child Panel Child.
+function Panel:SetSkipChildDuringPainting(child) end
+
+--- Sets start drag when mouse exits panel.
+--- @param start boolean Start.
+function Panel:SetStartDragWhenMouseExitsPanel(start) end
+
+--- Sets tab position.
+--- @param pos number Position.
+function Panel:SetTabPosition(pos) end
+
+--- Sets tall.
+--- @param tall number Tall.
+function Panel:SetTall(tall) end
+
+--- Sets triple press allowed.
+--- @param allowed boolean Allowed.
+function Panel:SetTriplePressAllowed(allowed) end
+
+--- Sets visible.
+--- @param visible boolean Visible.
+function Panel:SetVisible(visible) end
+
+--- Sets wide.
+--- @param wide number Wide.
+function Panel:SetWide(wide) end
+
+--- Sets Z position.
+--- @param z number Z.
+function Panel:SetZPos(z) end
+
+--- Checks if should handle input message.
+--- @return boolean
+function Panel:ShouldHandleInputMessage() end
+
+--- Converts string to key code.
+--- @param str string String.
+--- @return number
+function Panel:StringToKeyCode(str) end
+
+--- @class Button : Panel
+--- Basic button control.
+local Button = {}
+
+--- Checks if the button can be the default button.
+--- @return boolean
+function Button:CanBeDefaultButton() end
+
+--- Chains the button to the animation map.
+function Button:ChainToAnimationMap() end
+
+--- Chains the button to the map.
+function Button:ChainToMap() end
+
+--- Performs a click action on the button.
+function Button:DoClick() end
+
+--- Draws the focus box.
+--- @param enabled boolean Whether to enable the focus box.
+function Button:DrawFocusBox(enabled) end
+
+--- Fires the action signal.
+function Button:FireActionSignal() end
+
+--- Forces the button to be depressed.
+--- @param depressed boolean Whether to depress the button.
+function Button:ForceDepressed(depressed) end
+
+--- Gets the background color of the button.
+--- @return Color
+function Button:GetButtonBgColor() end
+
+--- Gets the foreground color of the button.
+--- @return Color
+function Button:GetButtonFgColor() end
+
+--- Gets the base class name of the panel.
+--- @return string
+function Button:GetPanelBaseClassName() end
+
+--- Gets the class name of the panel.
+--- @return string
+function Button:GetPanelClassName() end
+
+--- Gets the reference table for Lua scripting.
+--- @return table|nil
+function Button:GetRefTable() end
+
+--- Checks if the button is armed (hovered/ready).
+--- @return boolean
+function Button:IsArmed() end
+
+--- Checks if the button is blinking.
+--- @return boolean
+function Button:IsBlinking() end
+
+--- Checks if the button is depressed (pressed down).
+--- @return boolean
+function Button:IsDepressed() end
+
+--- Checks if the focus box is being drawn.
+--- @return boolean
+function Button:IsDrawingFocusBox() end
+
+--- Checks if mouse click is enabled for a code.
+--- @param code MouseCode The mouse code.
+--- @return boolean
+function Button:IsMouseClickEnabled(code) end
+
+--- Checks if the button is selected.
+--- @return boolean
+function Button:IsSelected() end
+
+--- Checks if use-capture-mouse is enabled.
+--- @return boolean
+function Button:IsUseCaptureMouseEnabled() end
+
+--- Adds a bound key for keyboard input.
+--- @param key string The key name.
+--- @param code number The key code.
+--- @param modifier number Modifier (e.g., shift).
+function Button:KB_AddBoundKey(key, code, modifier) end
+
+--- Chains keyboard input to the map.
+function Button:KB_ChainToMap() end
+
+--- Called when cursor enters.
+function Button:OnCursorEntered() end
+
+--- Called when cursor exits.
+function Button:OnCursorExited() end
+
+--- Called on hotkey press.
+function Button:OnHotkey() end
+
+--- Called when focus is killed.
+function Button:OnKillFocus() end
+
+--- Called when focus is set.
+function Button:OnSetFocus() end
+
+--- Performs layout.
+function Button:PerformLayout() end
+
+--- Recalculates the depressed state.
+function Button:RecalculateDepressedState() end
+
+--- Sets the armed state.
+--- @param armed boolean Whether armed.
+function Button:SetArmed(armed) end
+
+--- Sets the armed colors.
+--- @param fg Color Foreground color.
+--- @param bg Color Background color.
+function Button:SetArmedColor(fg, bg) end
+
+--- Sets the armed sound.
+--- @param sound string Sound file.
+function Button:SetArmedSound(sound) end
+
+--- Sets as current default button.
+--- @param value number Value (int).
+function Button:SetAsCurrentDefaultButton(value) end
+
+--- Sets as default button.
+--- @param value number Value (int).
+function Button:SetAsDefaultButton(value) end
+
+--- Sets blinking state.
+--- @param blink boolean Whether blinking.
+function Button:SetBlink(blink) end
+
+--- Sets the blink color.
+--- @param color Color The color.
+function Button:SetBlinkColor(color) end
+
+--- Sets the button activation type.
+--- @param type ActivationType The type.
+function Button:SetButtonActivationType(type) end
+
+--- Enables/disables button border.
+--- @param enabled boolean Whether enabled.
+function Button:SetButtonBorderEnabled(enabled) end
+
+--- Sets default colors.
+--- @param fg Color Foreground color.
+--- @param bg Color Background color.
+function Button:SetDefaultColor(fg, bg) end
+
+--- Sets depressed colors.
+--- @param fg Color Foreground color.
+--- @param bg Color Background color.
+function Button:SetDepressedColor(fg, bg) end
+
+--- Sets the depressed sound.
+--- @param sound string Sound file.
+function Button:SetDepressedSound(sound) end
+
+--- Enables/disables mouse click for code.
+--- @param code MouseCode The code.
+--- @param enabled boolean Whether enabled.
+function Button:SetMouseClickEnabled(code, enabled) end
+
+--- Sets the released sound.
+--- @param sound string Sound file.
+function Button:SetReleasedSound(sound) end
+
+--- Sets the selected state.
+--- @param selected boolean Whether selected.
+function Button:SetSelected(selected) end
+
+--- Sets whether the button should paint.
+--- @param paint boolean Whether to paint.
+function Button:SetShouldPaint(paint) end
+
+--- Sets use-capture-mouse.
+--- @param capture boolean Whether to capture.
+function Button:SetUseCaptureMouse(capture) end
+
+--- Checks if the button should paint.
+--- @return boolean
+function Button:ShouldPaint() end
+
+--- Sizes the button to its contents.
+function Button:SizeToContents() end
+
+--- @class CheckButton : Button
+--- Check button control (toggleable checkbox).
+local CheckButton = {}
+
+--- Chains to animation map.
+function CheckButton:ChainToAnimationMap() end
+
+--- Chains to map.
+function CheckButton:ChainToMap() end
+
+--- Gets disabled background color.
+--- @return Color
+function CheckButton:GetDisabledBgColor() end
+
+--- Gets disabled foreground color.
+--- @return Color
+function CheckButton:GetDisabledFgColor() end
+
+--- Gets panel base class name.
+--- @return string
+function CheckButton:GetPanelBaseClassName() end
+
+--- Gets panel class name.
+--- @return string
+function CheckButton:GetPanelClassName() end
+
+--- Gets reference table for Lua.
+--- @return table|nil
+function CheckButton:GetRefTable() end
+
+--- Adds bound key.
+--- @param key string Key name.
+--- @param code number Key code.
+--- @param modifier number Modifier.
+function CheckButton:KB_AddBoundKey(key, code, modifier) end
+
+--- Chains keyboard to map.
+function CheckButton:KB_ChainToMap() end
+
+--- Sets whether the check button is checkable.
+--- @param checkable boolean Whether checkable.
+function CheckButton:SetCheckButtonCheckable(checkable) end
+
+--- Sets the selected (checked) state.
+--- @param selected boolean Whether selected.
+function CheckButton:SetSelected(selected) end
+
+--- Called when the check button is checked (override in Lua).
+function CheckButton:OnCheckButtonChecked() end
+
+--- @class Frame : Panel
+--- Frame window control.
+local Frame = {}
+
+--- Activates the frame.
+function Frame:Activate() end
+
+--- Activates the frame minimized.
+function Frame:ActivateMinimized() end
+
+--- Checks if keys can chain to parent.
+--- @return boolean
+function Frame:CanChainKeysToParent() end
+
+--- Checks if dragging can start.
+--- @param x1 number X1.
+--- @param y1 number Y1.
+--- @param x2 number X2.
+--- @param y2 number Y2.
+--- @return boolean
+function Frame:CanStartDragging(x1, y1, x2, y2) end
+
+--- Chains to animation map.
+function Frame:ChainToAnimationMap() end
+
+--- Chains to map.
+function Frame:ChainToMap() end
+
+--- Closes the frame.
+function Frame:Close() end
+
+--- Closes the modal frame.
+function Frame:CloseModal() end
+
+--- Deletes the panel.
+function Frame:DeletePanel() end
+
+--- Disables fade effect.
+function Frame:DisableFadeEffect() end
+
+--- Makes the frame modal.
+function Frame:DoModal() end
+
+--- Flashes the window.
+function Frame:FlashWindow() end
+
+--- Stops flashing the window.
+function Frame:FlashWindowStop() end
+
+--- Gets bottom-right size.
+--- @return number
+function Frame:GetBottomRightSize() end
+
+--- Gets caption height.
+--- @return number
+function Frame:GetCaptionHeight() end
+
+--- Gets clip-to-parent state.
+--- @return boolean
+function Frame:GetClipToParent() end
+
+--- Gets corner size.
+--- @return number
+function Frame:GetCornerSize() end
+
+--- Gets dragger size.
+--- @return number
+function Frame:GetDraggerSize() end
+
+--- Gets panel base class name.
+--- @return string
+function Frame:GetPanelBaseClassName() end
+
+--- Gets panel class name.
+--- @return string
+function Frame:GetPanelClassName() end
+
+--- Gets reference table for Lua.
+--- @return table|nil
+function Frame:GetRefTable() end
+
+--- Checks if minimized.
+--- @return boolean
+function Frame:IsMinimized() end
+
+--- Checks if moveable.
+--- @return boolean
+function Frame:IsMoveable() end
+
+--- Checks if sizeable.
+--- @return boolean
+function Frame:IsSizeable() end
+
+--- Checks if small caption.
+--- @return boolean
+function Frame:IsSmallCaption() end
+
+--- Adds bound key.
+--- @param key string Key name.
+--- @param code number Key code.
+--- @param modifier number Modifier.
+function Frame:KB_AddBoundKey(key, code, modifier) end
+
+--- Chains keyboard to map.
+function Frame:KB_ChainToMap() end
+
+--- Loads control settings from resource.
+--- @param path string Resource path.
+--- @param opt1 string? Optional param.
+--- @param opt2 KeyValues? Optional keyvalues.
+function Frame:LoadControlSettings(path, opt1, opt2) end
+
+--- Moves to center of screen.
+function Frame:MoveToCenterOfScreen() end
+
+--- Called on command.
+--- @param command string The command.
+function Frame:OnCommand(command) end
+
+--- Places under cursor.
+function Frame:PlaceUnderCursor() end
+
+--- Sets chain keys to parent.
+--- @param chain boolean Whether to chain.
+function Frame:SetChainKeysToParent(chain) end
+
+--- Sets clip to parent.
+--- @param clip boolean Whether to clip.
+function Frame:SetClipToParent(clip) end
+
+--- Sets close button visibility.
+--- @param visible boolean Whether visible.
+function Frame:SetCloseButtonVisible(visible) end
+
+--- Sets delete self on close.
+--- @param delete boolean Whether to delete.
+function Frame:SetDeleteSelfOnClose(delete) end
+
+--- Sets images.
+--- @param img1 string Image 1.
+--- @param img2 string? Image 2 (optional).
+function Frame:SetImages(img1, img2) end
+
+--- Sets maximize button visibility.
+--- @param visible boolean Whether visible.
+function Frame:SetMaximizeButtonVisible(visible) end
+
+--- Sets menu button responsive.
+--- @param responsive boolean Whether responsive.
+function Frame:SetMenuButtonResponsive(responsive) end
+
+--- Sets menu button visibility.
+--- @param visible boolean Whether visible.
+function Frame:SetMenuButtonVisible(visible) end
+
+--- Sets minimize button visibility.
+--- @param visible boolean Whether visible.
+function Frame:SetMinimizeButtonVisible(visible) end
+
+--- Sets minimize-to-systray button visibility.
+--- @param visible boolean Whether visible.
+function Frame:SetMinimizeToSysTrayButtonVisible(visible) end
+
+--- Sets moveable state.
+--- @param moveable boolean Whether moveable.
+function Frame:SetMoveable(moveable) end
+
+--- Sets sizeable state.
+--- @param sizeable boolean Whether sizeable.
+function Frame:SetSizeable(sizeable) end
+
+--- Sets small caption.
+--- @param small boolean Whether small.
+function Frame:SetSmallCaption(small) end
+
+--- Sets the title.
+--- @param title string The title text.
+--- @param unknown boolean Unknown param (from code).
+function Frame:SetTitle(title, unknown) end
+
+--- Sets title bar visibility.
+--- @param visible boolean Whether visible.
+function Frame:SetTitleBarVisible(visible) end
+
+--- @class PropertyDialog : Frame
+--- Property dialog control.
+local PropertyDialog = {}
+
+--- Adds a page to the dialog.
+--- @param page Panel The page panel.
+--- @param title string The page title.
+function PropertyDialog:AddPage(page, title) end
+
+--- Applies changes in the dialog.
+function PropertyDialog:ApplyChanges() end
+
+--- Chains to animation map.
+function PropertyDialog:ChainToAnimationMap() end
+
+--- Chains to map.
+function PropertyDialog:ChainToMap() end
+
+--- Enables/disables the apply button.
+--- @param enable boolean Whether to enable.
+function PropertyDialog:EnableApplyButton(enable) end
+
+--- Gets the active page.
+--- @return Panel
+function PropertyDialog:GetActivePage() end
+
+--- Gets panel base class name.
+--- @return string
+function PropertyDialog:GetPanelBaseClassName() end
+
+--- Gets panel class name.
+--- @return string
+function PropertyDialog:GetPanelClassName() end
+
+--- Gets reference table for Lua.
+--- @return table|nil
+function PropertyDialog:GetRefTable() end
+
+--- Adds bound key.
+--- @param key string Key name.
+--- @param code number Key code.
+--- @param modifier number Modifier.
+function PropertyDialog:KB_AddBoundKey(key, code, modifier) end
+
+--- Chains keyboard to map.
+function PropertyDialog:KB_ChainToMap() end
+
+--- Resets all data.
+function PropertyDialog:ResetAllData() end
+
+--- Sets apply button text.
+--- @param text string The text.
+function PropertyDialog:SetApplyButtonText(text) end
+
+--- Sets apply button visibility.
+--- @param visible boolean Whether visible.
+function PropertyDialog:SetApplyButtonVisible(visible) end
+
+--- Sets cancel button text.
+--- @param text string The text.
+function PropertyDialog:SetCancelButtonText(text) end
+
+--- Sets cancel button visibility.
+--- @param visible boolean Whether visible.
+function PropertyDialog:SetCancelButtonVisible(visible) end
+
+--- Sets OK button text.
+--- @param text string The text.
+function PropertyDialog:SetOKButtonText(text) end
+
+--- Sets OK button visibility.
+--- @param visible boolean Whether visible.
+function PropertyDialog:SetOKButtonVisible(visible) end
+
+--- Called when cancel button is pressed (override in Lua).
+function PropertyDialog:OnCancel() end
+
+--- Called on OK/Apply (override in Lua).
+--- @param applyOnly boolean Whether apply only.
+--- @return boolean
+function PropertyDialog:OnOK(applyOnly) end
+
+--- @class PropertyPage : Panel
+--- Property page control.
+local PropertyPage = {}
+
+--- Chains to animation map.
+function PropertyPage:ChainToAnimationMap() end
+
+--- Chains to map.
+function PropertyPage:ChainToMap() end
+
+--- Gets panel base class name.
+--- @return string
+function PropertyPage:GetPanelBaseClassName() end
+
+--- Gets panel class name.
+--- @return string
+function PropertyPage:GetPanelClassName() end
+
+--- Gets reference table for Lua.
+--- @return table|nil
+function PropertyPage:GetRefTable() end
+
+--- Checks if has user config settings.
+--- @return boolean
+function PropertyPage:HasUserConfigSettings() end
+
+--- Adds bound key.
+--- @param key string Key name.
+--- @param code number Key code.
+--- @param modifier number Modifier.
+function PropertyPage:KB_AddBoundKey(key, code, modifier) end
+
+--- Chains keyboard to map.
+function PropertyPage:KB_ChainToMap() end
+
+--- Called to apply changes (override in Lua).
+function PropertyPage:OnApplyChanges() end
+
+--- Called on key code typed.
+--- @param code KeyCode The code.
+function PropertyPage:OnKeyCodeTyped(code) end
+
+--- Called when page hides (override in Lua).
+function PropertyPage:OnPageHide() end
+
+--- Called when page shows (override in Lua).
+function PropertyPage:OnPageShow() end
+
+--- Called to reset data (override in Lua).
+function PropertyPage:OnResetData() end
+
+--- Sets visibility.
+--- @param visible boolean Whether visible.
+function PropertyPage:SetVisible(visible) end
+
+--- Called when page tab is activated.
+--- @param pageTab Panel The page tab.
+function PropertyPage:OnPageTabActivated(pageTab) end
+
+--- @class CScriptedClientLuaPanel : Panel
+--- Scripted client Lua panel.
+local CScriptedClientLuaPanel = {}
+
+--- Creates default panels.
+function CScriptedClientLuaPanel:CreateDefaultPanels() end
+
+--- Starts the panel with game UI funcs and event manager.
+--- @param pGameUIFuncs any Game UI funcs.
+--- @param pGameEventManager any Game event manager.
+function CScriptedClientLuaPanel:Start(pGameUIFuncs, pGameEventManager) end
+
+--- Sets the parent panel.
+--- @param parent any VPANEL parent.
+function CScriptedClientLuaPanel:SetParent(parent) end
+
+--- Paints the panel.
+function CScriptedClientLuaPanel:Paint() end
+
+--- @class CScriptedHudViewport : Panel
+--- Scripted HUD viewport.
+local CScriptedHudViewport = {}
+
+--- Sets the parent panel.
+--- @param parent any VPANEL parent.
+function CScriptedHudViewport:SetParent(parent) end
+
+--- Paints the panel.
+function CScriptedHudViewport:Paint() end
+
+--- @class EditablePanel : Panel
+--- Editable panel control.
+local EditablePanel = {}
+
+--- Activates build mode.
+function EditablePanel:ActivateBuildMode() end
+
+--- Applies settings.
+--- @param settings KeyValues Settings.
+function EditablePanel:ApplySettings(settings) end
+
+--- Chains to animation map.
+function EditablePanel:ChainToAnimationMap() end
+
+--- Chains to map.
+function EditablePanel:ChainToMap() end
+
+--- Creates control by name.
+--- @param name string Name.
+--- @return Panel
+function EditablePanel:CreateControlByName(name) end
+
+--- Gets control int.
+--- @param name string Name.
+--- @param default number Default.
+--- @return number
+function EditablePanel:GetControlInt(name, default) end
+
+--- Gets control string.
+--- @param name string Name.
+--- @param default string Default.
+--- @return string
+function EditablePanel:GetControlString(name, default) end
+
+--- Gets current key focus.
+--- @return Panel
+function EditablePanel:GetCurrentKeyFocus() end
+
+--- Gets dialog variables.
+--- @return KeyValues
+function EditablePanel:GetDialogVariables() end
+
+--- Gets panel base class name.
+--- @return string
+function EditablePanel:GetPanelBaseClassName() end
+
+--- Gets panel class name.
+--- @return string
+function EditablePanel:GetPanelClassName() end
+
+--- Checks if has hotkey.
+--- @param hotkey string Hotkey.
+--- @return Panel
+function EditablePanel:HasHotkey(hotkey) end
+
+--- Adds bound key.
+--- @param key string Key.
+--- @param code number Code.
+--- @param modifier number Modifier.
+function EditablePanel:KB_AddBoundKey(key, code, modifier) end
+
+--- Chains keyboard to map.
+function EditablePanel:KB_ChainToMap() end
+
+--- Converts key code to string.
+--- @param code KeyCode Code.
+--- @return string
+function EditablePanel:KeyCodeToString(code) end
+
+--- Loads control settings.
+--- @param path string Path.
+--- @param opt1 string? Optional.
+--- @param opt2 KeyValues? Optional.
+function EditablePanel:LoadControlSettings(path, opt1, opt2) end
+
+--- Loads control settings and user config.
+--- @param path string Path.
+--- @param unknown number? Unknown.
+function EditablePanel:LoadControlSettingsAndUserConfig(path, unknown) end
+
+--- Loads user config.
+--- @param path string Path.
+--- @param unknown number? Unknown.
+function EditablePanel:LoadUserConfig(path, unknown) end
+
+--- Called on key code typed.
+--- @param code KeyCode Code.
+function EditablePanel:OnKeyCodeTyped(code) end
+
+--- Called on request focus.
+--- @param sub VPanel Sub.
+--- @param default VPanel Default.
+function EditablePanel:OnRequestFocus(sub, default) end
+
+--- Called on set focus.
+function EditablePanel:OnSetFocus() end
+
+--- Registers control settings file.
+--- @param file string File.
+--- @param opt string? Optional.
+function EditablePanel:RegisterControlSettingsFile(file, opt) end
+
+--- Requests focus.
+--- @param unknown number? Unknown.
+function EditablePanel:RequestFocus(unknown) end
+
+--- Requests focus next.
+--- @param vpanel VPanel VPanel.
+--- @return boolean
+function EditablePanel:RequestFocusNext(vpanel) end
+
+--- Requests focus prev.
+--- @param vpanel VPanel VPanel.
+--- @return boolean
+function EditablePanel:RequestFocusPrev(vpanel) end
+
+--- Requests info.
+--- @param kv KeyValues KV.
+--- @return boolean
+function EditablePanel:RequestInfo(kv) end
+
+--- Requests info from child.
+--- @param child string Child.
+--- @param kv KeyValues KV.
+--- @return boolean
+function EditablePanel:RequestInfoFromChild(child, kv) end
+
+--- Saves user config.
+function EditablePanel:SaveUserConfig() end
+
+--- Sets control enabled.
+--- @param name string Name.
+--- @param enabled boolean Enabled.
+function EditablePanel:SetControlEnabled(name, enabled) end
+
+--- Sets control int.
+--- @param name string Name.
+--- @param value number Value.
+function EditablePanel:SetControlInt(name, value) end
+
+--- Sets control string.
+--- @param name string Name.
+--- @param value string Value.
+function EditablePanel:SetControlString(name, value) end
+
+--- Sets control visible.
+--- @param name string Name.
+--- @param visible boolean Visible.
+function EditablePanel:SetControlVisible(name, visible) end
+
+--- Sets dialog variable.
+--- @param name string Name.
+--- @param value string|number Value (string or number).
+function EditablePanel:SetDialogVariable(name, value) end
+
+--- @class IScheme
+--- Scheme interface.
+local IScheme = {}
+
+--- Gets color.
+--- @param name string Name.
+--- @param default Color Default.
+--- @return Color
+function IScheme:GetColor(name, default) end
+
+--- Gets font.
+--- @param name string Name.
+--- @param proportional boolean? Proportional.
+--- @return HFont
+function IScheme:GetFont(name, proportional) end
+
+--- Gets font name.
+--- @param font HFont Font.
+--- @return string
+function IScheme:GetFontName(font) end
+
+--- Gets resource string.
+--- @param name string Name.
+--- @return string
+function IScheme:GetResourceString(name) end
+
+--- @class surface
+surface = {}
+
+--- Adds bitmap font file.
+--- @param file string File.
+--- @return boolean
+function surface.AddBitmapFontFile(file) end
+
+--- Adds custom font file.
+--- @param file string File.
+--- @param name string Name.
+--- @return boolean
+function surface.AddCustomFontFile(file, name) end
+
+--- Adds panel.
+--- @param vpanel VPanel VPanel.
+function surface.AddPanel(vpanel) end
+
+--- Applies changes.
+function surface.ApplyChanges() end
+
+--- Brings to front.
+--- @param vpanel VPanel VPanel.
+function surface.BringToFront(vpanel) end
+
+--- Calculates mouse visible.
+function surface.CalculateMouseVisible() end
+
+--- Clears temporary font cache.
+function surface.ClearTemporaryFontCache() end
+
+--- Creates font.
+--- @return HFont
+function surface.CreateFont() end
+
+--- Creates new texture ID.
+--- @param unknown boolean? Unknown.
+--- @return number
+function surface.CreateNewTextureID(unknown) end
+
+--- Creates popup.
+--- @param vpanel VPanel VPanel.
+--- @param unknown1 boolean Unknown1.
+--- @param unknown2 boolean? Unknown2.
+--- @param unknown3 boolean? Unknown3.
+--- @param unknown4 boolean? Unknown4.
+--- @param unknown5 boolean? Unknown5.
+function surface.CreatePopup(vpanel, unknown1, unknown2, unknown3, unknown4, unknown5) end
+
+--- Draws filled rect.
+--- @param x1 number X1.
+--- @param y1 number Y1.
+--- @param x2 number X2.
+--- @param y2 number Y2.
+function surface.DrawFilledRect(x1, y1, x2, y2) end
+
+--- Draws filled rect fade.
+--- @param x1 number X1.
+--- @param y1 number Y1.
+--- @param x2 number X2.
+--- @param y2 number Y2.
+--- @param startAlpha number Start alpha.
+--- @param endAlpha number End alpha.
+--- @param horizontal boolean Horizontal.
+function surface.DrawFilledRectFade(x1, y1, x2, y2, startAlpha, endAlpha, horizontal) end
+
+--- Draws flush text.
+function surface.DrawFlushText() end
+
+--- Draws get alpha multiplier.
+--- @return number
+function surface.DrawGetAlphaMultiplier() end
+
+--- Draws get text pos.
+--- @return number, number x, y
+function surface.DrawGetTextPos() end
+
+--- Draws get texture file.
+--- @param id number ID.
+--- @param size number Size.
+--- @return boolean, string success, filename
+function surface.DrawGetTextureFile(id, size) end
+
+--- Draws get texture id.
+--- @param file string File.
+--- @return number
+function surface.DrawGetTextureId(file) end
+
+--- Draws get texture size.
+--- @param id number ID.
+--- @return number, number wide, tall
+function surface.DrawGetTextureSize(id) end
+
+--- Draws line.
+--- @param x1 number X1.
+--- @param y1 number Y1.
+--- @param x2 number X2.
+--- @param y2 number Y2.
+function surface.DrawLine(x1, y1, x2, y2) end
+
+--- Draws outlined circle.
+--- @param x number X.
+--- @param y number Y.
+--- @param radius number Radius.
+--- @param segments number Segments.
+function surface.DrawOutlinedCircle(x, y, radius, segments) end
+
+--- Draws outlined rect.
+--- @param x1 number X1.
+--- @param y1 number Y1.
+--- @param x2 number X2.
+--- @param y2 number Y2.
+function surface.DrawOutlinedRect(x1, y1, x2, y2) end
+
+--- Draws print text.
+--- @param text string Text.
+--- @param unknown number? Unknown (FontDrawType).
+function surface.DrawPrintText(text, unknown) end
+
+--- Draws set alpha multiplier.
+--- @param alpha number Alpha.
+function surface.DrawSetAlphaMultiplier(alpha) end
+
+--- Draws set color.
+--- @param r number R.
+--- @param g number G.
+--- @param b number B.
+--- @param a number A.
+function surface.DrawSetColor(r, g, b, a) end
+
+--- Draws set text color.
+--- @param r number R.
+--- @param g number G.
+--- @param b number B.
+--- @param a number A.
+function surface.DrawSetTextColor(r, g, b, a) end
+
+--- Draws set text font.
+--- @param font HFont Font.
+function surface.DrawSetTextFont(font) end
+
+--- Draws set text pos.
+--- @param x number X.
+--- @param y number Y.
+function surface.DrawSetTextPos(x, y) end
+
+--- Draws set text scale.
+--- @param sx number SX.
+--- @param sy number SY.
+function surface.DrawSetTextScale(sx, sy) end
+
+--- Draws set texture.
+--- @param id number ID.
+function surface.DrawSetTexture(id) end
+
+--- Draws set texture file.
+--- @param id number ID.
+--- @param file string File.
+--- @param unknown1 number Unknown1.
+--- @param unknown2 boolean Unknown2.
+function surface.DrawSetTextureFile(id, file, unknown1, unknown2) end
+
+--- Draws textured rect.
+--- @param x1 number X1.
+--- @param y1 number Y1.
+--- @param x2 number X2.
+--- @param y2 number Y2.
+function surface.DrawTexturedRect(x1, y1, x2, y2) end
+
+--- Draws textured sub rect.
+--- @param x1 number X1.
+--- @param y1 number Y1.
+--- @param x2 number X2.
+--- @param y2 number Y2.
+--- @param tx1 number TX1.
+--- @param ty1 number TY1.
+--- @param tx2 number TX2.
+--- @param ty2 number TY2.
+function surface.DrawTexturedSubRect(x1, y1, x2, y2, tx1, ty1, tx2, ty2) end
+
+--- Enables mouse capture.
+--- @param vpanel VPanel VPanel.
+--- @param enable boolean Enable.
+function surface.EnableMouseCapture(vpanel, enable) end
+
+--- Flashes window.
+--- @param vpanel VPanel VPanel.
+--- @param flash boolean Flash.
+function surface.FlashWindow(vpanel, flash) end
+
+--- Gets absolute window bounds.
+--- @return number, number, number, number x, y, wide, tall
+function surface.GetAbsoluteWindowBounds() end
+
+--- Gets bitmap font name.
+--- @param name string Name.
+--- @return string
+function surface.GetBitmapFontName(name) end
+
+--- Gets char ABC wide.
+--- @param font HFont Font.
+--- @param char number Char.
+--- @return number, number, number a, b, c
+function surface.GetCharABCwide(font, char) end
+
+--- Gets character width.
+--- @param font HFont Font.
+--- @param char number Char.
+--- @return number
+function surface.GetCharacterWidth(font, char) end
+
+--- Gets embedded panel.
+--- @return Panel
+function surface.GetEmbeddedPanel() end
+
+--- Gets font ascent.
+--- @param font HFont Font.
+--- @param char string Char.
+--- @return number
+function surface.GetFontAscent(font, char) end
+
+--- Gets font tall.
+--- @param font HFont Font.
+--- @return number
+function surface.GetFontTall(font) end
+
+--- Gets modal panel.
+--- @return Panel
+function surface.GetModalPanel() end
+
+--- Gets notify panel.
+--- @return Panel
+function surface.GetNotifyPanel() end
+
+--- Gets popup.
+--- @param index number Index.
+--- @return Panel
+function surface.GetPopup(index) end
+
+--- Gets popup count.
+--- @return number
+function surface.GetPopupCount() end
+
+--- Gets proportional base.
+--- @return number, number width, height
+function surface.GetProportionalBase() end
+
+--- Gets resolution key.
+--- @return string
+function surface.GetResolutionKey() end
+
+--- Gets screen size.
+--- @return number, number wide, tall
+function surface.GetScreenSize() end
+
+--- Gets text size.
+--- @param font HFont Font.
+--- @param text string Text.
+--- @return number, number wide, tall
+function surface.GetTextSize(font, text) end
+
+--- Gets title.
+--- @param vpanel VPanel VPanel.
+--- @return string
+function surface.GetTitle(vpanel) end
+
+--- Gets topmost popup.
+--- @return Panel
+function surface.GetTopmostPopup() end
+
+--- Gets workspace bounds.
+--- @return number, number, number, number x, y, wide, tall
+function surface.GetWorkspaceBounds() end
+
+--- Gets Z pos.
+--- @return number
+function surface.GetZPos() end
+
+--- Checks if has cursor pos functions.
+--- @return boolean
+function surface.HasCursorPosFunctions() end
+
+--- Checks if has focus.
+--- @return boolean
+function surface.HasFocus() end
+
+--- Invalidates.
+--- @param vpanel VPanel VPanel.
+function surface.Invalidate(vpanel) end
+
+--- Checks if cursor locked.
+--- @return boolean
+function surface.IsCursorLocked() end
+
+--- Checks if cursor visible.
+--- @return boolean
+function surface.IsCursorVisible() end
+
+--- Checks if font additive.
+--- @param font HFont Font.
+--- @return boolean
+function surface.IsFontAdditive(font) end
+
+--- Checks if minimized.
+--- @param vpanel VPanel VPanel.
+--- @return boolean
+function surface.IsMinimized(vpanel) end
+
+--- Checks if texture ID valid.
+--- @param id number ID.
+--- @return boolean
+function surface.IsTextureIDValid(id) end
+
+--- Checks if within.
+--- @param x number X.
+--- @param y number Y.
+--- @return boolean
+function surface.IsWithin(x, y) end
+
+--- Locks cursor.
+function surface.LockCursor() end
+
+--- Moves popup to back.
+--- @param vpanel VPanel VPanel.
+function surface.MovePopupToBack(vpanel) end
+
+--- Moves popup to front.
+--- @param vpanel VPanel VPanel.
+function surface.MovePopupToFront(vpanel) end
+
+--- Needs KB input.
+--- @return boolean
+function surface.NeedKBInput() end
+
+--- Called on screen size changed.
+--- @param wide number Wide.
+--- @param tall number Tall.
+function surface.OnScreenSizeChanged(wide, tall) end
+
+--- Paints traverse.
+--- @param vpanel VPanel VPanel.
+function surface.PaintTraverse(vpanel) end
+
+--- Paints traverse ex.
+--- @param vpanel VPanel VPanel.
+--- @param unknown boolean? Unknown.
+function surface.PaintTraverseEx(vpanel, unknown) end
+
+--- Plays sound.
+--- @param sound string Sound.
+function surface.PlaySound(sound) end
+
+--- Pops make current.
+--- @param vpanel VPanel VPanel.
+function surface.PopMakeCurrent(vpanel) end
+
+--- Runs frame.
+function surface.RunFrame() end
+
+--- Sets allow HTML JavaScript.
+--- @param allow boolean Allow.
+function surface.SetAllowHTMLJavaScript(allow) end
+
+--- Sets bitmap font name.
+--- @param name string Name.
+--- @param file string File.
+function surface.SetBitmapFontName(name, file) end
+
+--- Sets embedded panel.
+--- @param vpanel VPanel VPanel.
+function surface.SetEmbeddedPanel(vpanel) end
+
+--- Sets font glyph set.
+--- @param font HFont Font.
+--- @param name string Name.
+--- @param tall number Tall.
+--- @param weight number Weight.
+--- @param blur number Blur.
+--- @param scanlines number Scanlines.
+--- @param flags number Flags.
+--- @param rangeMin number? Range min.
+--- @param rangeMax number? Range max.
+--- @return boolean
+function surface.SetFontGlyphSet(font, name, tall, weight, blur, scanlines, flags, rangeMin, rangeMax) end
+
+--- Sets translate extended keys.
+--- @param translate boolean Translate.
+function surface.SetTranslateExtendedKeys(translate) end
+
+--- Sets workspace insets.
+--- @param left number Left.
+--- @param top number Top.
+--- @param right number Right.
+--- @param bottom number Bottom.
+function surface.SetWorkspaceInsets(left, top, right, bottom) end
+
+--- Supports feature.
+--- @param feature SurfaceFeature Feature.
+function surface.SupportsFeature(feature) end
+
+--- Surface get cursor pos.
+--- @return number, number x, y
+function surface.SurfaceGetCursorPos() end
+
+--- Surface set cursor pos.
+--- @param x number X.
+--- @param y number Y.
+function surface.SurfaceSetCursorPos(x, y) end
+
+--- Unlocks cursor.
+function surface.UnlockCursor() end
+
+--- @class FONTFLAG
+FONTFLAG = {}
+
+--- No font flag.
+FONTFLAG.NONE = 0
+
+--- Italic font.
+FONTFLAG.ITALIC = 1
+
+--- Underline font.
+FONTFLAG.UNDERLINE = 2
+
+--- Strikeout font.
+FONTFLAG.STRIKEOUT = 3
+
+--- Symbol font.
+FONTFLAG.SYMBOL = 4
+
+--- Antialias font.
+FONTFLAG.ANTIALIAS = 5
+
+--- Gaussian blur font.
+FONTFLAG.GAUSSIANBLUR = 6
+
+--- Rotary font.
+FONTFLAG.ROTARY = 7
+
+--- Dropshadow font.
+FONTFLAG.DROPSHADOW = 8
+
+--- Additive font.
+FONTFLAG.ADDITIVE = 9
+
+--- Outline font.
+FONTFLAG.OUTLINE = 10
+
+--- Custom font.
+FONTFLAG.CUSTOM = 11
+
+--- Bitmap font.
+FONTFLAG.BITMAP = 12
+
+--- VGUI namespace for constructors.
+--- @class vgui
+vgui = {}
+
+--- Creates a Panel.
+--- @param parent Panel? Optional parent panel.
+--- @param panelName string? Optional name.
+--- @return Panel
+function vgui.Panel(parent, panelName) end
+
+--- Creates a Button.
+--- @param parent Panel? Optional parent.
+--- @param panelName string Name.
+--- @param text string Button text.
+--- @param pActionSignalTarget Panel? Action target.
+--- @param pCmd string? Command.
+--- @return Button
+function vgui.Button(parent, panelName, text, pActionSignalTarget, pCmd) end
+
+--- Creates a CheckButton.
+--- @param parent Panel? Optional parent.
+--- @param panelName string? Optional name.
+--- @param text string? Optional text.
+--- @return CheckButton
+function vgui.CheckButton(parent, panelName, text) end
+
+--- Creates a Frame.
+--- @param parent Panel? Optional parent.
+--- @param panelName string? Optional name.
+--- @param showTaskbarIcon boolean? Show taskbar icon (default true).
+--- @return Frame
+function vgui.Frame(parent, panelName, showTaskbarIcon) end
+
+--- Creates a PropertyDialog.
+--- @param parent Panel? Optional parent.
+--- @param panelName string Name.
+--- @return PropertyDialog
+function vgui.PropertyDialog(parent, panelName) end
+
+--- Creates a PropertyPage.
+--- @param parent Panel? Optional parent.
+--- @param panelName string Name.
+--- @return PropertyPage
+function vgui.PropertyPage(parent, panelName) end
+
+--- Gets game UI panel.
+--- @return Panel
+function vgui.VGui_GetGameUIPanel() end
+
+--- Gets client Lua root panel.
+--- @return Panel
+function vgui.VGui_GetClientLuaRootPanel() end
+
+--- Scheme library functions.
+--- @class scheme
+scheme = {}
+
+--- Gets default scheme.
+--- @return HScheme
+function scheme.GetDefaultScheme() end
+
+--- Gets IScheme.
+--- @param scheme HScheme Scheme.
+--- @return IScheme
+function scheme.GetIScheme(scheme) end
+
+--- Gets proportional normalized value.
+--- @param value number Value.
+--- @return number
+function scheme.GetProportionalNormalizedValue(value) end
+
+--- Gets proportional normalized value ex.
+--- @param scheme HScheme Scheme.
+--- @param value number Value.
+--- @return number
+function scheme.GetProportionalNormalizedValueEx(scheme, value) end
+
+--- Gets proportional scaled value.
+--- @param value number Value.
+--- @return number
+function scheme.GetProportionalScaledValue(value) end
+
+--- Gets proportional scaled value ex.
+--- @param scheme HScheme Scheme.
+--- @param value number Value.
+--- @return number
+function scheme.GetProportionalScaledValueEx(scheme, value) end
+
+--- Gets scheme.
+--- @param name string Name.
+--- @return HScheme
+function scheme.GetScheme(name) end
+
+--- Loads scheme from file.
+--- @param file string File.
+--- @param name string Name.
+--- @return HScheme
+function scheme.LoadSchemeFromFile(file, name) end
+
+--- Loads scheme from file ex.
+--- @param vpanel VPanel VPanel.
+--- @param file string File.
+--- @param name string Name.
+--- @return HScheme
+function scheme.LoadSchemeFromFileEx(vpanel, file, name) end
+
+--- Reloads fonts.
+function scheme.ReloadFonts() end
+
+--- Reloads schemes.
+function scheme.ReloadSchemes() end
+
+--- Gets the GameUI panel.
+--- @return VPanel
+function VGui_GetGameUIPanel() end
+
+---@class IMaterial
+local IMaterial = {}
+
+--- Increase reference count (prevent unloading).
+function IMaterial:AddRef() end
+
+--- Modulates the material alpha (transparency).
+---@param alpha number # Alpha multiplier (0–1)
+function IMaterial:AlphaModulate(alpha) end
+
+--- Modulates the material color.
+---@param r number
+---@param g number
+---@param b number
+function IMaterial:ColorModulate(r, g, b) end
+
+--- Decreases reference count by one.
+function IMaterial:DecrementReferenceCount() end
+
+--- Deletes material if no references remain.
+function IMaterial:DeleteIfUnreferenced() end
+
+--- Returns current alpha modulation value.
+---@return number
+function IMaterial:GetAlphaModulation() end
+
+--- Returns current color modulation values.
+---@return number r, number g, number b
+function IMaterial:GetColorModulation() end
+
+--- Returns enumeration ID (engine internal).
+---@return integer
+function IMaterial:GetEnumerationID() end
+
+--- Returns texture mapping height in pixels.
+---@return integer
+function IMaterial:GetMappingHeight() end
+
+--- Returns texture mapping width in pixels.
+---@return integer
+function IMaterial:GetMappingWidth() end
+
+--- Returns the material page this is part of.
+---@return IMaterial
+function IMaterial:GetMaterialPage() end
+
+--- Checks if a specific material flag is set.
+---@param flag integer # MaterialVarFlags_t
+---@return boolean
+function IMaterial:GetMaterialVarFlag(flag) end
+
+--- Returns morph format enum.
+---@return integer
+function IMaterial:GetMorphFormat() end
+
+--- Returns the material’s name.
+---@return string
+function IMaterial:GetName() end
+
+--- Returns number of animation frames.
+---@return integer
+function IMaterial:GetNumAnimationFrames() end
+
+--- Returns number of render passes.
+---@return integer
+function IMaterial:GetNumPasses() end
+
+--- Checks a material property flag.
+---@param prop integer # MaterialPropertyTypes_t
+---@return boolean
+function IMaterial:GetPropertyFlag(prop) end
+
+--- Returns reflectivity vector.
+---@return Vector
+function IMaterial:GetReflectivity() end
+
+--- Returns the shader name used.
+---@return string
+function IMaterial:GetShaderName() end
+
+--- Returns the texture group name.
+---@return string
+function IMaterial:GetTextureGroupName() end
+
+--- Returns memory usage in bytes.
+---@return integer
+function IMaterial:GetTextureMemoryBytes() end
+
+--- Returns true if the material has a proxy.
+---@return boolean
+function IMaterial:HasProxy() end
+
+--- Increases reference count by one.
+function IMaterial:IncrementReferenceCount() end
+
+--- Returns true if material belongs to a material page.
+---@return boolean
+function IMaterial:InMaterialPage() end
+
+--- Returns true if material uses alpha testing.
+---@return boolean
+function IMaterial:IsAlphaTested() end
+
+--- Returns true if this is the error material.
+---@return boolean
+function IMaterial:IsErrorMaterial() end
+
+--- Returns true if material is a sprite card.
+---@return boolean
+function IMaterial:IsSpriteCard() end
+
+--- Returns true if material is translucent.
+---@return boolean
+function IMaterial:IsTranslucent() end
+
+--- Returns true if material is two-sided.
+---@return boolean
+function IMaterial:IsTwoSided() end
+
+--- Returns true if material is vertex lit.
+---@return boolean
+function IMaterial:IsVertexLit() end
+
+--- Returns whether it needs full framebuffer texture.
+---@param checkHardwareCaps? boolean
+---@return boolean
+function IMaterial:NeedsFullFrameBufferTexture(checkHardwareCaps) end
+
+--- Returns true if material needs lightmap blend alpha.
+---@return boolean
+function IMaterial:NeedsLightmapBlendAlpha() end
+
+--- Returns whether it needs power-of-two framebuffer texture.
+---@param checkHardwareCaps? boolean
+---@return boolean
+function IMaterial:NeedsPowerOfTwoFrameBufferTexture(checkHardwareCaps) end
+
+--- Returns true if material needs software lighting.
+---@return boolean
+function IMaterial:NeedsSoftwareLighting() end
+
+--- Returns true if material needs software skinning.
+---@return boolean
+function IMaterial:NeedsSoftwareSkinning() end
+
+--- Returns true if material requires tangent space.
+---@return boolean
+function IMaterial:NeedsTangentSpace() end
+
+--- Recomputes state snapshots.
+function IMaterial:RecomputeStateSnapshots() end
+
+--- Refreshes the material.
+function IMaterial:Refresh() end
+
+--- Refreshes while preserving material vars.
+function IMaterial:RefreshPreservingMaterialVars() end
+
+--- Releases the material (decrement + free).
+function IMaterial:Release() end
+
+--- Sets a material var flag.
+---@param flag integer
+---@param on boolean
+function IMaterial:SetMaterialVarFlag(flag, on) end
+
+--- Sets the shader by name.
+---@param shader string
+function IMaterial:SetShader(shader) end
+
+--- Enables/disables baked lighting.
+---@param enable boolean
+function IMaterial:SetUseFixedFunctionBakedLighting(enable) end
+
+--- Returns number of shader parameters.
+---@return integer
+function IMaterial:ShaderParamCount() end
+
+--- Returns true if material uses env cubemap.
+---@return boolean
+function IMaterial:UsesEnvCubemap() end
+
+--- Returns true if material was reloaded from whitelist.
+---@return boolean
+function IMaterial:WasReloadedFromWhitelist() end
+
+--- Returns string representation.
+---@return string
+function IMaterial:__tostring() end
+
+--- global NULL value
 NULL = nil
 
--- start activities
-
---- Invalid activity, used to check for invalid states.
-ACT_INVALID = nil
-
---- Reset activity to force a reset to m_IdealActivity.
-ACT_RESET = nil
-
---- Idle animation.
-ACT_IDLE = nil
-
---- Transition between activities.
-ACT_TRANSITION = nil
-
---- Cover animation (obsolete, redundant with ACT_COVER_LOW).
-ACT_COVER = nil
-
---- Medium cover animation (unsupported).
-ACT_COVER_MED = nil
-
---- Low cover animation (rename to ACT_IDLE_CROUCH?).
-ACT_COVER_LOW = nil
-
---- Walking animation.
-ACT_WALK = nil
-
---- Walking while aiming.
-ACT_WALK_AIM = nil
-
---- Crouching walk animation.
-ACT_WALK_CROUCH = nil
-
---- Crouching walk while aiming.
-ACT_WALK_CROUCH_AIM = nil
-
---- Running animation.
-ACT_RUN = nil
-
---- Running while aiming.
-ACT_RUN_AIM = nil
-
---- Crouching run animation.
-ACT_RUN_CROUCH = nil
-
---- Crouching run while aiming.
-ACT_RUN_CROUCH_AIM = nil
-
---- Running while protected.
-ACT_RUN_PROTECTED = nil
-
---- Custom movement defined by script.
-ACT_SCRIPT_CUSTOM_MOVE = nil
-
---- Primary range attack.
-ACT_RANGE_ATTACK1 = nil
-
---- Secondary range attack.
-ACT_RANGE_ATTACK2 = nil
-
---- Crouched primary range attack (not used yet).
-ACT_RANGE_ATTACK1_LOW = nil
-
---- Crouched secondary range attack (not used yet).
-ACT_RANGE_ATTACK2_LOW = nil
-
---- Simple death animation.
-ACT_DIESIMPLE = nil
-
---- Death animation, falling backward.
-ACT_DIEBACKWARD = nil
-
---- Death animation, falling forward.
-ACT_DIEFORWARD = nil
-
---- Violent death animation.
-ACT_DIEVIOLENT = nil
-
---- Death with ragdoll physics.
-ACT_DIERAGDOLL = nil
-
---- Flying animation (and flapping if appropriate).
-ACT_FLY = nil
-
---- Hovering animation.
-ACT_HOVER = nil
-
---- Gliding animation.
-ACT_GLIDE = nil
-
---- Swimming animation.
-ACT_SWIM = nil
-
---- Jumping animation.
-ACT_JUMP = nil
-
---- Vertical jump (hop).
-ACT_HOP = nil
-
---- Long forward jump (leap).
-ACT_LEAP = nil
-
---- Landing animation.
-ACT_LAND = nil
-
---- Climbing up animation.
-ACT_CLIMB_UP = nil
-
---- Climbing down animation.
-ACT_CLIMB_DOWN = nil
-
---- Dismounting from climbing.
-ACT_CLIMB_DISMOUNT = nil
-
---- Climbing up a ship ladder.
-ACT_SHIPLADDER_UP = nil
-
---- Climbing down a ship ladder.
-ACT_SHIPLADDER_DOWN = nil
-
---- Strafing left.
-ACT_STRAFE_LEFT = nil
-
---- Strafing right.
-ACT_STRAFE_RIGHT = nil
-
---- Tuck and roll left.
-ACT_ROLL_LEFT = nil
-
---- Tuck and roll right.
-ACT_ROLL_RIGHT = nil
-
---- Quick turn left (stationary).
-ACT_TURN_LEFT = nil
-
---- Quick turn right (stationary).
-ACT_TURN_RIGHT = nil
-
---- Crouching down from standing (obsolete, used by soldier).
-ACT_CROUCH = nil
-
---- Holding body in crouched position (obsolete, used by soldier).
-ACT_CROUCHIDLE = nil
-
---- Standing up from crouching (obsolete, should be transition).
-ACT_STAND = nil
-
---- Using an object or interactable.
-ACT_USE = nil
-
---- First signal animation.
-ACT_SIGNAL1 = nil
-
---- Second signal animation.
-ACT_SIGNAL2 = nil
-
---- Third signal animation.
-ACT_SIGNAL3 = nil
-
---- Squad signal to advance.
-ACT_SIGNAL_ADVANCE = nil
-
---- Squad signal to move forward.
-ACT_SIGNAL_FORWARD = nil
-
---- Squad signal to group.
-ACT_SIGNAL_GROUP = nil
-
---- Squad signal to halt.
-ACT_SIGNAL_HALT = nil
-
---- Squad signal to move left.
-ACT_SIGNAL_LEFT = nil
-
---- Squad signal to move right.
-ACT_SIGNAL_RIGHT = nil
-
---- Squad signal to take cover.
-ACT_SIGNAL_TAKECOVER = nil
-
---- Look back over right shoulder without turning.
-ACT_LOOKBACK_RIGHT = nil
-
---- Look back over left shoulder without turning.
-ACT_LOOKBACK_LEFT = nil
-
---- Cowering animation (unused, more extreme crouching).
-ACT_COWER = nil
-
---- Small flinch animation (needed? use overlays instead?).
-ACT_SMALL_FLINCH = nil
-
---- Big flinch animation.
-ACT_BIG_FLINCH = nil
-
---- Primary melee attack.
-ACT_MELEE_ATTACK1 = nil
-
---- Secondary melee attack.
-ACT_MELEE_ATTACK2 = nil
-
---- Reload animation.
-ACT_RELOAD = nil
-
---- Start of reload animation.
-ACT_RELOAD_START = nil
-
---- End of reload animation.
-ACT_RELOAD_FINISH = nil
-
---- Low reload animation.
-ACT_RELOAD_LOW = nil
-
---- Pulling out a weapon (e.g., gun).
-ACT_ARM = nil
-
---- Reholstering a weapon.
-ACT_DISARM = nil
-
---- Dropping a weapon.
-ACT_DROP_WEAPON = nil
-
---- Dropping a shotgun.
-ACT_DROP_WEAPON_SHOTGUN = nil
-
---- Picking up an object from the ground.
-ACT_PICKUP_GROUND = nil
-
---- Picking up an object from a rack or shelf.
-ACT_PICKUP_RACK = nil
-
---- Combat-ready idle animation (agitated).
-ACT_IDLE_ANGRY = nil
-
---- Relaxed idle animation.
-ACT_IDLE_RELAXED = nil
-
---- Stimulated idle animation.
-ACT_IDLE_STIMULATED = nil
-
---- Agitated idle animation.
-ACT_IDLE_AGITATED = nil
-
---- Stealth idle animation.
-ACT_IDLE_STEALTH = nil
-
---- Hurt idle animation.
-ACT_IDLE_HURT = nil
-
---- Relaxed walk animation.
-ACT_WALK_RELAXED = nil
-
---- Stimulated walk animation.
-ACT_WALK_STIMULATED = nil
-
---- Agitated walk animation.
-ACT_WALK_AGITATED = nil
-
---- Stealth walk animation.
-ACT_WALK_STEALTH = nil
-
---- Relaxed run animation.
-ACT_RUN_RELAXED = nil
-
---- Stimulated run animation.
-ACT_RUN_STIMULATED = nil
-
---- Agitated run animation.
-ACT_RUN_AGITATED = nil
-
---- Stealth run animation.
-ACT_RUN_STEALTH = nil
-
---- Relaxed aiming idle animation.
-ACT_IDLE_AIM_RELAXED = nil
-
---- Stimulated aiming idle animation.
-ACT_IDLE_AIM_STIMULATED = nil
-
---- Agitated aiming idle animation.
-ACT_IDLE_AIM_AGITATED = nil
-
---- Stealth aiming idle animation.
-ACT_IDLE_AIM_STEALTH = nil
-
---- Relaxed aiming walk animation.
-ACT_WALK_AIM_RELAXED = nil
-
---- Stimulated aiming walk animation.
-ACT_WALK_AIM_STIMULATED = nil
-
---- Agitated aiming walk animation.
-ACT_WALK_AIM_AGITATED = nil
-
---- Stealth aiming walk animation.
-ACT_WALK_AIM_STEALTH = nil
-
---- Relaxed aiming run animation.
-ACT_RUN_AIM_RELAXED = nil
-
---- Stimulated aiming run animation.
-ACT_RUN_AIM_STIMULATED = nil
-
---- Agitated aiming run animation.
-ACT_RUN_AIM_AGITATED = nil
-
---- Stealth aiming run animation.
-ACT_RUN_AIM_STEALTH = nil
-
---- Stimulated crouching idle animation.
-ACT_CROUCHIDLE_STIMULATED = nil
-
---- Stimulated aiming crouching idle animation.
-ACT_CROUCHIDLE_AIM_STIMULATED = nil
-
---- Agitated crouching idle animation.
-ACT_CROUCHIDLE_AGITATED = nil
-
---- Hurt walk animation (limping).
-ACT_WALK_HURT = nil
-
---- Hurt run animation (limping).
-ACT_RUN_HURT = nil
-
---- Monster-specific special attack 1.
-ACT_SPECIAL_ATTACK1 = nil
-
---- Monster-specific special attack 2.
-ACT_SPECIAL_ATTACK2 = nil
-
---- Agitated combat idle (unused).
-ACT_COMBAT_IDLE = nil
-
---- Scared walk animation.
-ACT_WALK_SCARED = nil
-
---- Scared run animation.
-ACT_RUN_SCARED = nil
-
---- Victory dance after killing a player.
-ACT_VICTORY_DANCE = nil
-
---- Death from headshot.
-ACT_DIE_HEADSHOT = nil
-
---- Death from chest shot.
-ACT_DIE_CHESTSHOT = nil
-
---- Death from gut shot.
-ACT_DIE_GUTSHOT = nil
-
---- Death from back shot.
-ACT_DIE_BACKSHOT = nil
-
---- Flinch from head hit.
-ACT_FLINCH_HEAD = nil
-
---- Flinch from chest hit.
-ACT_FLINCH_CHEST = nil
-
---- Flinch from stomach hit.
-ACT_FLINCH_STOMACH = nil
-
---- Flinch from left arm hit.
-ACT_FLINCH_LEFTARM = nil
-
---- Flinch from right arm hit.
-ACT_FLINCH_RIGHTARM = nil
-
---- Flinch from left leg hit.
-ACT_FLINCH_LEFTLEG = nil
-
---- Flinch from right leg hit.
-ACT_FLINCH_RIGHTLEG = nil
-
---- Flinch with physics interaction.
-ACT_FLINCH_PHYSICS = nil
-
---- Idle animation while on fire.
-ACT_IDLE_ON_FIRE = nil
-
---- Walk animation while on fire.
-ACT_WALK_ON_FIRE = nil
-
---- Run animation while on fire.
-ACT_RUN_ON_FIRE = nil
-
---- Rappel loop animation.
-ACT_RAPPEL_LOOP = nil
-
---- 180-degree left turn.
-ACT_180_LEFT = nil
-
---- 180-degree right turn.
-ACT_180_RIGHT = nil
-
---- 90-degree left turn.
-ACT_90_LEFT = nil
-
---- 90-degree right turn.
-ACT_90_RIGHT = nil
-
---- Single step left.
-ACT_STEP_LEFT = nil
-
---- Single step right.
-ACT_STEP_RIGHT = nil
-
---- Single step backward.
-ACT_STEP_BACK = nil
-
---- Single step forward.
-ACT_STEP_FORE = nil
-
---- Primary range attack gesture.
-ACT_GESTURE_RANGE_ATTACK1 = nil
-
---- Secondary range attack gesture.
-ACT_GESTURE_RANGE_ATTACK2 = nil
-
---- Primary melee attack gesture.
-ACT_GESTURE_MELEE_ATTACK1 = nil
-
---- Secondary melee attack gesture.
-ACT_GESTURE_MELEE_ATTACK2 = nil
-
---- Crouched primary range attack gesture (not used yet).
-ACT_GESTURE_RANGE_ATTACK1_LOW = nil
-
---- Crouched secondary range attack gesture (not used yet).
-ACT_GESTURE_RANGE_ATTACK2_LOW = nil
-
---- Melee attack swing gesture.
-ACT_MELEE_ATTACK_SWING_GESTURE = nil
-
---- Small flinch gesture.
-ACT_GESTURE_SMALL_FLINCH = nil
-
---- Big flinch gesture.
-ACT_GESTURE_BIG_FLINCH = nil
-
---- Flinch gesture from explosion.
-ACT_GESTURE_FLINCH_BLAST = nil
-
---- Flinch gesture from shotgun blast.
-ACT_GESTURE_FLINCH_BLAST_SHOTGUN = nil
-
---- Flinch gesture from explosion damage.
-ACT_GESTURE_FLINCH_BLAST_DAMAGED = nil
-
---- Flinch gesture from shotgun explosion damage.
-ACT_GESTURE_FLINCH_BLAST_DAMAGED_SHOTGUN = nil
-
---- Flinch gesture from head hit.
-ACT_GESTURE_FLINCH_HEAD = nil
-
---- Flinch gesture from chest hit.
-ACT_GESTURE_FLINCH_CHEST = nil
-
---- Flinch gesture from stomach hit.
-ACT_GESTURE_FLINCH_STOMACH = nil
-
---- Flinch gesture from left arm hit.
-ACT_GESTURE_FLINCH_LEFTARM = nil
-
---- Flinch gesture from right arm hit.
-ACT_GESTURE_FLINCH_RIGHTARM = nil
-
---- Flinch gesture from left leg hit.
-ACT_GESTURE_FLINCH_LEFTLEG = nil
-
---- Flinch gesture from right leg hit.
-ACT_GESTURE_FLINCH_RIGHTLEG = nil
-
---- Turn left gesture.
-ACT_GESTURE_TURN_LEFT = nil
-
---- Turn right gesture.
-ACT_GESTURE_TURN_RIGHT = nil
-
---- 45-degree left turn gesture.
-ACT_GESTURE_TURN_LEFT45 = nil
-
---- 45-degree right turn gesture.
-ACT_GESTURE_TURN_RIGHT45 = nil
-
---- 90-degree left turn gesture.
-ACT_GESTURE_TURN_LEFT90 = nil
-
---- 90-degree right turn gesture.
-ACT_GESTURE_TURN_RIGHT90 = nil
-
---- Flat 45-degree left turn gesture.
-ACT_GESTURE_TURN_LEFT45_FLAT = nil
-
---- Flat 45-degree right turn gesture.
-ACT_GESTURE_TURN_RIGHT45_FLAT = nil
-
---- Flat 90-degree left turn gesture.
-ACT_GESTURE_TURN_LEFT90_FLAT = nil
-
---- Flat 90-degree right turn gesture.
-ACT_GESTURE_TURN_RIGHT90_FLAT = nil
-
---- Barnacle tongue hit.
-ACT_BARNACLE_HIT = nil
-
---- Barnacle lifting monster (loop).
-ACT_BARNACLE_PULL = nil
-
---- Barnacle latching onto monster.
-ACT_BARNACLE_CHOMP = nil
-
---- Barnacle holding monster in mouth (loop).
-ACT_BARNACLE_CHEW = nil
-
---- Do not disturb NPC sequence.
-ACT_DO_NOT_DISTURB = nil
-
---- Draw weapon viewmodel animation.
-ACT_VM_DRAW = nil
-
---- Holster weapon viewmodel animation.
-ACT_VM_HOLSTER = nil
-
---- Idle weapon viewmodel animation.
-ACT_VM_IDLE = nil
-
---- Fidget weapon viewmodel animation.
-ACT_VM_FIDGET = nil
-
---- Pullback weapon viewmodel animation.
-ACT_VM_PULLBACK = nil
-
---- High pullback weapon viewmodel animation.
-ACT_VM_PULLBACK_HIGH = nil
-
---- Low pullback weapon viewmodel animation.
-ACT_VM_PULLBACK_LOW = nil
-
---- Throw weapon viewmodel animation.
-ACT_VM_THROW = nil
-
---- Pull pin for grenade viewmodel animation.
-ACT_VM_PULLPIN = nil
-
---- Primary attack viewmodel animation.
-ACT_VM_PRIMARYATTACK = nil
-
---- Secondary attack viewmodel animation.
-ACT_VM_SECONDARYATTACK = nil
-
---- Reload viewmodel animation.
-ACT_VM_RELOAD = nil
-
---- Reload start viewmodel animation.
-ACT_VM_RELOAD_START = nil
-
---- Reload finish viewmodel animation.
-ACT_VM_RELOAD_FINISH = nil
-
---- Dry fire viewmodel animation (no ammo).
-ACT_VM_DRYFIRE = nil
-
---- Bludgeon swing left hit (primary attack).
-ACT_VM_HITLEFT = nil
-
---- Bludgeon swing left hit (secondary attack).
-ACT_VM_HITLEFT2 = nil
-
---- Bludgeon swing right hit (primary attack).
-ACT_VM_HITRIGHT = nil
-
---- Bludgeon swing right hit (secondary attack).
-ACT_VM_HITRIGHT2 = nil
-
---- Bludgeon swing center hit (primary attack).
-ACT_VM_HITCENTER = nil
-
---- Bludgeon swing center hit (secondary attack).
-ACT_VM_HITCENTER2 = nil
-
---- Bludgeon swing left miss (primary attack).
-ACT_VM_MISSLEFT = nil
-
---- Bludgeon swing left miss (secondary attack).
-ACT_VM_MISSLEFT2 = nil
-
---- Bludgeon swing right miss (primary attack).
-ACT_VM_MISSRIGHT = nil
-
---- Bludgeon swing right miss (secondary attack).
-ACT_VM_MISSRIGHT2 = nil
-
---- Bludgeon swing center miss (primary attack).
-ACT_VM_MISSCENTER = nil
-
---- Bludgeon swing center miss (secondary attack).
-ACT_VM_MISSCENTER2 = nil
-
---- Bludgeon haul back for hard strike (secondary attack).
-ACT_VM_HAULBACK = nil
-
---- Bludgeon release hard strike (secondary attack).
-ACT_VM_SWINGHARD = nil
-
---- Bludgeon swing miss.
-ACT_VM_SWINGMISS = nil
-
---- Bludgeon swing hit.
-ACT_VM_SWINGHIT = nil
-
---- Transition from idle to lowered viewmodel animation.
-ACT_VM_IDLE_TO_LOWERED = nil
-
---- Lowered idle viewmodel animation.
-ACT_VM_IDLE_LOWERED = nil
-
---- Transition from lowered to idle viewmodel animation.
-ACT_VM_LOWERED_TO_IDLE = nil
-
---- Recoil animation 1.
-ACT_VM_RECOIL1 = nil
-
---- Recoil animation 2.
-ACT_VM_RECOIL2 = nil
-
---- Recoil animation 3.
-ACT_VM_RECOIL3 = nil
-
---- Pickup weapon viewmodel animation.
-ACT_VM_PICKUP = nil
-
---- Release weapon viewmodel animation.
-ACT_VM_RELEASE = nil
-
---- Attach silencer viewmodel animation.
-ACT_VM_ATTACH_SILENCER = nil
-
---- Detach silencer viewmodel animation.
-ACT_VM_DETACH_SILENCER = nil
-
---- Special draw viewmodel animation (TF2 Scout Pack).
-ACT_VM_DRAW_SPECIAL = nil
-
---- Special holster viewmodel animation (TF2 Scout Pack).
-ACT_VM_HOLSTER_SPECIAL = nil
-
---- Special idle viewmodel animation (TF2 Scout Pack).
-ACT_VM_IDLE_SPECIAL = nil
-
---- Special pullback viewmodel animation (TF2 Scout Pack).
-ACT_VM_PULLBACK_SPECIAL = nil
-
---- Special primary attack viewmodel animation (TF2 Scout Pack).
-ACT_VM_PRIMARYATTACK_SPECIAL = nil
-
---- Special secondary attack viewmodel animation (TF2 Scout Pack).
-ACT_VM_SECONDARYATTACK_SPECIAL = nil
-
---- Special center hit viewmodel animation (TF2 Scout Pack).
-ACT_VM_HITCENTER_SPECIAL = nil
-
---- Special hard swing viewmodel animation (TF2 Scout Pack).
-ACT_VM_SWINGHARD_SPECIAL = nil
-
---- Special idle to lowered viewmodel animation (TF2 Scout Pack).
-ACT_VM_IDLE_TO_LOWERED_SPECIAL = nil
-
---- Special lowered idle viewmodel animation (TF2 Scout Pack).
-ACT_VM_IDLE_LOWERED_SPECIAL = nil
-
---- Special lowered to idle viewmodel animation (TF2 Scout Pack).
-ACT_VM_LOWERED_TO_IDLE_SPECIAL = nil
-
---- Fists hit left viewmodel animation.
-ACT_FISTS_VM_HITLEFT = nil
-
---- Fists hit right viewmodel animation.
-ACT_FISTS_VM_HITRIGHT = nil
-
---- Fists swing hard viewmodel animation.
-ACT_FISTS_VM_SWINGHARD = nil
-
---- Fists idle viewmodel animation.
-ACT_FISTS_VM_IDLE = nil
-
---- Fists draw viewmodel animation.
-ACT_FISTS_VM_DRAW = nil
-
---- SLAM stickwall idle animation.
-ACT_SLAM_STICKWALL_IDLE = nil
-
---- SLAM stickwall no-draw idle animation.
-ACT_SLAM_STICKWALL_ND_IDLE = nil
-
---- SLAM stickwall attach animation.
-ACT_SLAM_STICKWALL_ATTACH = nil
-
---- SLAM stickwall attach 2 animation.
-ACT_SLAM_STICKWALL_ATTACH2 = nil
-
---- SLAM stickwall no-draw attach animation.
-ACT_SLAM_STICKWALL_ND_ATTACH = nil
-
---- SLAM stickwall no-draw attach 2 animation.
-ACT_SLAM_STICKWALL_ND_ATTACH2 = nil
-
---- SLAM stickwall detonate animation.
-ACT_SLAM_STICKWALL_DETONATE = nil
-
---- SLAM stickwall detonator holster animation.
-ACT_SLAM_STICKWALL_DETONATOR_HOLSTER = nil
-
---- SLAM stickwall draw animation.
-ACT_SLAM_STICKWALL_DRAW = nil
-
---- SLAM stickwall no-draw draw animation.
-ACT_SLAM_STICKWALL_ND_DRAW = nil
-
---- SLAM stickwall to throw animation.
-ACT_SLAM_STICKWALL_TO_THROW = nil
-
---- SLAM stickwall to throw no-draw animation.
-ACT_SLAM_STICKWALL_TO_THROW_ND = nil
-
---- SLAM stickwall to tripmine no-draw animation.
-ACT_SLAM_STICKWALL_TO_TRIPMINE_ND = nil
-
---- SLAM throw idle animation.
-ACT_SLAM_THROW_IDLE = nil
-
---- SLAM throw no-draw idle animation.
-ACT_SLAM_THROW_ND_IDLE = nil
-
---- SLAM throw animation.
-ACT_SLAM_THROW_THROW = nil
-
---- SLAM throw 2 animation.
-ACT_SLAM_THROW_THROW2 = nil
-
---- SLAM throw no-draw animation.
-ACT_SLAM_THROW_THROW_ND = nil
-
---- SLAM throw no-draw 2 animation.
-ACT_SLAM_THROW_THROW_ND2 = nil
-
---- SLAM throw draw animation.
-ACT_SLAM_THROW_DRAW = nil
-
---- SLAM throw no-draw draw animation.
-ACT_SLAM_THROW_ND_DRAW = nil
-
---- SLAM throw to stickwall animation.
-ACT_SLAM_THROW_TO_STICKWALL = nil
-
---- SLAM throw to stickwall no-draw animation.
-ACT_SLAM_THROW_TO_STICKWALL_ND = nil
-
---- SLAM throw to tripmine no-draw animation.
-ACT_SLAM_THROW_TO_TRIPMINE_ND = nil
-
---- SLAM tripmine idle animation.
-ACT_SLAM_TRIPMINE_IDLE = nil
-
---- SLAM tripmine draw animation.
-ACT_SLAM_TRIPMINE_DRAW = nil
-
---- SLAM tripmine attach animation.
-ACT_SLAM_TRIPMINE_ATTACH = nil
-
---- SLAM tripmine attach 2 animation.
-ACT_SLAM_TRIPMINE_ATTACH2 = nil
-
---- SLAM tripmine to stickwall no-draw animation.
-ACT_SLAM_TRIPMINE_TO_STICKWALL_ND = nil
-
---- SLAM tripmine to throw no-draw animation.
-ACT_SLAM_TRIPMINE_TO_THROW_ND = nil
-
---- SLAM detonator idle animation.
-ACT_SLAM_DETONATOR_IDLE = nil
-
---- SLAM detonator draw animation.
-ACT_SLAM_DETONATOR_DRAW = nil
-
---- SLAM detonator detonate animation.
-ACT_SLAM_DETONATOR_DETONATE = nil
-
---- SLAM detonator holster animation.
-ACT_SLAM_DETONATOR_HOLSTER = nil
-
---- SLAM detonator stickwall draw animation.
-ACT_SLAM_DETONATOR_STICKWALL_DRAW = nil
-
---- SLAM detonator throw draw animation.
-ACT_SLAM_DETONATOR_THROW_DRAW = nil
-
---- Shotgun reload start animation.
-ACT_SHOTGUN_RELOAD_START = nil
-
---- Shotgun reload finish animation.
-ACT_SHOTGUN_RELOAD_FINISH = nil
-
---- Shotgun pump animation.
-ACT_SHOTGUN_PUMP = nil
-
---- SMG2 second idle animation.
-ACT_SMG2_IDLE2 = nil
-
---- SMG2 second fire animation.
-ACT_SMG2_FIRE2 = nil
-
---- SMG2 second draw animation.
-ACT_SMG2_DRAW2 = nil
-
---- SMG2 second reload animation.
-ACT_SMG2_RELOAD2 = nil
-
---- SMG2 second dry fire animation.
-ACT_SMG2_DRYFIRE2 = nil
-
---- SMG2 to auto mode animation.
-ACT_SMG2_TOAUTO = nil
-
---- SMG2 to burst mode animation.
-ACT_SMG2_TOBURST = nil
-
---- Physcannon upgrade animation.
-ACT_PHYSCANNON_UPGRADE = nil
-
---- AR1 range attack animation.
-ACT_RANGE_ATTACK_AR1 = nil
-
---- AR2 range attack animation.
-ACT_RANGE_ATTACK_AR2 = nil
-
---- AR2 low range attack animation.
-ACT_RANGE_ATTACK_AR2_LOW = nil
-
---- AR2 grenade range attack animation.
-ACT_RANGE_ATTACK_AR2_GRENADE = nil
-
---- HMG1 range attack animation.
-ACT_RANGE_ATTACK_HMG1 = nil
-
---- ML range attack animation.
-ACT_RANGE_ATTACK_ML = nil
-
---- SMG1 range attack animation.
-ACT_RANGE_ATTACK_SMG1 = nil
-
---- SMG1 low range attack animation.
-ACT_RANGE_ATTACK_SMG1_LOW = nil
-
---- SMG2 range attack animation.
-ACT_RANGE_ATTACK_SMG2 = nil
-
---- Shotgun range attack animation.
-ACT_RANGE_ATTACK_SHOTGUN = nil
-
---- Shotgun low range attack animation.
-ACT_RANGE_ATTACK_SHOTGUN_LOW = nil
-
---- Pistol range attack animation.
-ACT_RANGE_ATTACK_PISTOL = nil
-
---- Pistol low range attack animation.
-ACT_RANGE_ATTACK_PISTOL_LOW = nil
-
---- SLAM range attack animation.
-ACT_RANGE_ATTACK_SLAM = nil
-
---- Tripmine range attack animation.
-ACT_RANGE_ATTACK_TRIPWIRE = nil
-
---- Throw range attack animation.
-ACT_RANGE_ATTACK_THROW = nil
-
---- Sniper rifle range attack animation.
-ACT_RANGE_ATTACK_SNIPER_RIFLE = nil
-
---- RPG range attack animation.
-ACT_RANGE_ATTACK_RPG = nil
-
---- Melee attack swing animation.
-ACT_MELEE_ATTACK_SWING = nil
-
---- Low range aim animation.
-ACT_RANGE_AIM_LOW = nil
-
---- SMG1 low range aim animation.
-ACT_RANGE_AIM_SMG1_LOW = nil
-
---- Pistol low range aim animation.
-ACT_RANGE_AIM_PISTOL_LOW = nil
-
---- AR2 low range aim animation.
-ACT_RANGE_AIM_AR2_LOW = nil
-
---- Pistol low cover animation.
-ACT_COVER_PISTOL_LOW = nil
-
---- SMG1 low cover animation.
-ACT_COVER_SMG1_LOW = nil
-
---- AR1 range attack gesture.
-ACT_GESTURE_RANGE_ATTACK_AR1 = nil
-
---- AR2 range attack gesture.
-ACT_GESTURE_RANGE_ATTACK_AR2 = nil
-
---- AR2 grenade range attack gesture.
-ACT_GESTURE_RANGE_ATTACK_AR2_GRENADE = nil
-
---- HMG1 range attack gesture.
-ACT_GESTURE_RANGE_ATTACK_HMG1 = nil
-
---- ML range attack gesture.
-ACT_GESTURE_RANGE_ATTACK_ML = nil
-
---- SMG1 range attack gesture.
-ACT_GESTURE_RANGE_ATTACK_SMG1 = nil
-
---- SMG1 low range attack gesture.
-ACT_GESTURE_RANGE_ATTACK_SMG1_LOW = nil
-
---- SMG2 range attack gesture.
-ACT_GESTURE_RANGE_ATTACK_SMG2 = nil
-
---- Shotgun range attack gesture.
-ACT_GESTURE_RANGE_ATTACK_SHOTGUN = nil
-
---- Pistol range attack gesture.
-ACT_GESTURE_RANGE_ATTACK_PISTOL = nil
-
---- Pistol low range attack gesture.
-ACT_GESTURE_RANGE_ATTACK_PISTOL_LOW = nil
-
---- SLAM range attack gesture.
-ACT_GESTURE_RANGE_ATTACK_SLAM = nil
-
---- Tripmire range attack gesture.
-ACT_GESTURE_RANGE_ATTACK_TRIPWIRE = nil
-
---- Throw range attack gesture.
-ACT_GESTURE_RANGE_ATTACK_THROW = nil
-
---- Sniper rifle range attack gesture.
-ACT_GESTURE_RANGE_ATTACK_SNIPER_RIFLE = nil
-
---- Melee attack swing gesture.
-ACT_GESTURE_MELEE_ATTACK_SWING = nil
-
---- Rifle idle animation.
-ACT_IDLE_RIFLE = nil
-
---- SMG1 idle animation.
-ACT_IDLE_SMG1 = nil
-
---- Angry SMG1 idle animation.
-ACT_IDLE_ANGRY_SMG1 = nil
-
---- Pistol idle animation.
-ACT_IDLE_PISTOL = nil
-
---- Angry pistol idle animation.
-ACT_IDLE_ANGRY_PISTOL = nil
-
---- Angry shotgun idle animation.
-ACT_IDLE_ANGRY_SHOTGUN = nil
-
---- Stealth pistol idle animation.
-ACT_IDLE_STEALTH_PISTOL = nil
-
---- Package idle animation.
-ACT_IDLE_PACKAGE = nil
-
---- Package walk animation.
-ACT_WALK_PACKAGE = nil
-
---- Suitcase idle animation.
-ACT_IDLE_SUITCASE = nil
-
---- Suitcase walk animation.
-ACT_WALK_SUITCASE = nil
-
---- SMG1 relaxed idle animation.
-ACT_IDLE_SMG1_RELAXED = nil
-
---- SMG1 stimulated idle animation.
-ACT_IDLE_SMG1_STIMULATED = nil
-
---- Rifle relaxed walk animation.
-ACT_WALK_RIFLE_RELAXED = nil
-
---- Rifle relaxed run animation.
-ACT_RUN_RIFLE_RELAXED = nil
-
---- Rifle stimulated walk animation.
-ACT_WALK_RIFLE_STIMULATED = nil
-
---- Rifle stimulated run animation.
-ACT_RUN_RIFLE_STIMULATED = nil
-
---- Rifle stimulated aiming idle animation.
-ACT_IDLE_AIM_RIFLE_STIMULATED = nil
-
---- Rifle stimulated aiming walk animation.
-ACT_WALK_AIM_RIFLE_STIMULATED = nil
-
---- Rifle stimulated aiming run animation.
-ACT_RUN_AIM_RIFLE_STIMULATED = nil
-
---- Shotgun relaxed idle animation.
-ACT_IDLE_SHOTGUN_RELAXED = nil
-
---- Shotgun stimulated idle animation.
-ACT_IDLE_SHOTGUN_STIMULATED = nil
-
---- Shotgun agitated idle animation.
-ACT_IDLE_SHOTGUN_AGITATED = nil
-
---- Angry walk animation.
-ACT_WALK_ANGRY = nil
-
---- Police harass animation 1.
-ACT_POLICE_HARASS1 = nil
-
---- Police harass animation 2.
-ACT_POLICE_HARASS2 = nil
-
---- Manned gun idle animation.
-ACT_IDLE_MANNEDGUN = nil
-
---- Melee idle animation.
-ACT_IDLE_MELEE = nil
-
---- Angry melee idle animation.
-ACT_IDLE_ANGRY_MELEE = nil
-
---- RPG relaxed idle animation.
-ACT_IDLE_RPG_RELAXED = nil
-
---- RPG idle animation.
-ACT_IDLE_RPG = nil
-
---- Angry RPG idle animation.
-ACT_IDLE_ANGRY_RPG = nil
-
---- RPG low cover animation.
-ACT_COVER_LOW_RPG = nil
-
---- RPG walk animation.
-ACT_WALK_RPG = nil
-
---- RPG run animation.
-ACT_RUN_RPG = nil
-
---- RPG crouching walk animation.
-ACT_WALK_CROUCH_RPG = nil
-
---- RPG crouching run animation.
-ACT_RUN_CROUCH_RPG = nil
-
---- RPG relaxed walk animation.
-ACT_WALK_RPG_RELAXED = nil
-
---- RPG relaxed run animation.
-ACT_RUN_RPG_RELAXED = nil
-
---- Rifle walk animation.
-ACT_WALK_RIFLE = nil
-
---- Rifle aiming walk animation.
-ACT_WALK_AIM_RIFLE = nil
-
---- Rifle crouching walk animation.
-ACT_WALK_CROUCH_RIFLE = nil
-
---- Rifle aiming crouching walk animation.
-ACT_WALK_CROUCH_AIM_RIFLE = nil
-
---- Rifle run animation.
-ACT_RUN_RIFLE = nil
-
---- Rifle aiming run animation.
-ACT_RUN_AIM_RIFLE = nil
-
---- Rifle crouching run animation.
-ACT_RUN_CROUCH_RIFLE = nil
-
---- Rifle aiming crouching run animation.
-ACT_RUN_CROUCH_AIM_RIFLE = nil
-
---- Stealth pistol run animation.
-ACT_RUN_STEALTH_PISTOL = nil
-
---- Shotgun aiming walk animation.
-ACT_WALK_AIM_SHOTGUN = nil
-
---- Shotgun aiming run animation.
-ACT_RUN_AIM_SHOTGUN = nil
-
---- Pistol walk animation.
-ACT_WALK_PISTOL = nil
-
---- Pistol run animation.
-ACT_RUN_PISTOL = nil
-
---- Pistol aiming walk animation.
-ACT_WALK_AIM_PISTOL = nil
-
---- Pistol aiming run animation.
-ACT_RUN_AIM_PISTOL = nil
-
---- Stealth pistol walk animation.
-ACT_WALK_STEALTH_PISTOL = nil
-
---- Stealth pistol aiming walk animation.
-ACT_WALK_AIM_STEALTH_PISTOL = nil
-
---- Stealth pistol aiming run animation.
-ACT_RUN_AIM_STEALTH_PISTOL = nil
-
---- Pistol reload animation.
-ACT_RELOAD_PISTOL = nil
-
---- Pistol low reload animation.
-ACT_RELOAD_PISTOL_LOW = nil
-
---- SMG1 reload animation.
-ACT_RELOAD_SMG1 = nil
-
---- SMG1 low reload animation.
-ACT_RELOAD_SMG1_LOW = nil
-
---- Shotgun reload animation.
-ACT_RELOAD_SHOTGUN = nil
-
---- Shotgun low reload animation.
-ACT_RELOAD_SHOTGUN_LOW = nil
-
---- Reload gesture.
-ACT_GESTURE_RELOAD = nil
-
---- Pistol reload gesture.
-ACT_GESTURE_RELOAD_PISTOL = nil
-
---- SMG1 reload gesture.
-ACT_GESTURE_RELOAD_SMG1 = nil
-
---- Shotgun reload gesture.
-ACT_GESTURE_RELOAD_SHOTGUN = nil
-
---- Lean left busy animation.
-ACT_BUSY_LEAN_LEFT = nil
-
---- Lean left entry busy animation.
-ACT_BUSY_LEAN_LEFT_ENTRY = nil
-
---- Lean left exit busy animation.
-ACT_BUSY_LEAN_LEFT_EXIT = nil
-
---- Lean back busy animation.
-ACT_BUSY_LEAN_BACK = nil
-
---- Lean back entry busy animation.
-ACT_BUSY_LEAN_BACK_ENTRY = nil
-
---- Lean back exit busy animation.
-ACT_BUSY_LEAN_BACK_EXIT = nil
-
---- Sit ground busy animation.
-ACT_BUSY_SIT_GROUND = nil
-
---- Sit ground entry busy animation.
-ACT_BUSY_SIT_GROUND_ENTRY = nil
-
---- Sit ground exit busy animation.
-ACT_BUSY_SIT_GROUND_EXIT = nil
-
---- Sit chair busy animation.
-ACT_BUSY_SIT_CHAIR = nil
-
---- Sit chair entry busy animation.
-ACT_BUSY_SIT_CHAIR_ENTRY = nil
-
---- Sit chair exit busy animation.
-ACT_BUSY_SIT_CHAIR_EXIT = nil
-
---- Stand busy animation.
-ACT_BUSY_STAND = nil
-
---- Queue busy animation.
-ACT_BUSY_QUEUE = nil
-
---- Duck and dodge animation.
-ACT_DUCK_DODGE = nil
-
---- Barnacle swallow death animation.
-ACT_DIE_BARNACLE_SWALLOW = nil
-
---- Barnacle strangle gesture.
-ACT_GESTURE_BARNACLE_STRANGLE = nil
-
---- Physcannon detach animation.
-ACT_PHYSCANNON_DETACH = nil
-
---- Physcannon animate animation.
-ACT_PHYSCANNON_ANIMATE = nil
-
---- Physcannon animate pre-animation.
-ACT_PHYSCANNON_ANIMATE_PRE = nil
-
---- Physcannon animate post-animation.
-ACT_PHYSCANNON_ANIMATE_POST = nil
-
---- Death from front side.
-ACT_DIE_FRONTSIDE = nil
-
---- Death from right side.
-ACT_DIE_RIGHTSIDE = nil
-
---- Death from back side.
-ACT_DIE_BACKSIDE = nil
-
---- Death from left side.
-ACT_DIE_LEFTSIDE = nil
-
---- Open door animation.
-ACT_OPEN_DOOR = nil
-
---- Alyx zombie melee dynamic interaction.
-ACT_DI_ALYX_ZOMBIE_MELEE = nil
-
---- Alyx zombie torso melee dynamic interaction.
-ACT_DI_ALYX_ZOMBIE_TORSO_MELEE = nil
-
---- Alyx headcrab melee dynamic interaction.
-ACT_DI_ALYX_HEADCRAB_MELEE = nil
-
---- Alyx antlion dynamic interaction.
-ACT_DI_ALYX_ANTLION = nil
-
---- Alyx zombie shotgun 64 dynamic interaction.
-ACT_DI_ALYX_ZOMBIE_SHOTGUN64 = nil
-
---- Alyx zombie shotgun 26 dynamic interaction.
-ACT_DI_ALYX_ZOMBIE_SHOTGUN26 = nil
-
---- Readiness transition from relaxed to stimulated.
-ACT_READINESS_RELAXED_TO_STIMULATED = nil
-
---- Readiness walk transition from relaxed to stimulated.
-ACT_READINESS_RELAXED_TO_STIMULATED_WALK = nil
-
---- Readiness transition from agitated to stimulated.
-ACT_READINESS_AGITATED_TO_STIMULATED = nil
-
---- Readiness transition from stimulated to relaxed.
-ACT_READINESS_STIMULATED_TO_RELAXED = nil
-
---- Pistol readiness transition from relaxed to stimulated.
-ACT_READINESS_PISTOL_RELAXED_TO_STIMULATED = nil
-
---- Pistol readiness walk transition from relaxed to stimulated.
-ACT_READINESS_PISTOL_RELAXED_TO_STIMULATED_WALK = nil
-
---- Pistol readiness transition from agitated to stimulated.
-ACT_READINESS_PISTOL_AGITATED_TO_STIMULATED = nil
-
---- Pistol readiness transition from stimulated to relaxed.
-ACT_READINESS_PISTOL_STIMULATED_TO_RELAXED = nil
-
---- Idle carry animation.
-ACT_IDLE_CARRY = nil
-
---- Walk carry animation.
-ACT_WALK_CARRY = nil
-
---- HL2MP idle animation.
-ACT_HL2MP_IDLE = nil
-
---- HL2MP running animation.
-ACT_HL2MP_RUN = nil
-
---- HL2MP walking animation.
-ACT_HL2MP_WALK = nil
-
---- HL2MP jumping animation.
-ACT_HL2MP_JUMP = nil
-
---- HL2MP idle crouch animation.
-ACT_HL2MP_IDLE_CROUCH = nil
-
---- HL2MP walking crouch animation.
-ACT_HL2MP_WALK_CROUCH = nil
-
---- HL2MP gesture for range attack.
-ACT_HL2MP_GESTURE_RANGE_ATTACK = nil
-
---- HL2MP gesture for melee attack.
-ACT_HL2MP_GESTURE_MELEE_ATTACK = nil
-
---- HL2MP gesture for reload.
-ACT_HL2MP_GESTURE_RELOAD = nil
-
---- HL2MP idle animation for pistol.
-ACT_HL2MP_IDLE_PISTOL = nil
-
---- HL2MP running animation for pistol.
-ACT_HL2MP_RUN_PISTOL = nil
-
---- HL2MP walking animation for pistol.
-ACT_HL2MP_WALK_PISTOL = nil
-
---- HL2MP jumping animation for pistol.
-ACT_HL2MP_JUMP_PISTOL = nil
-
---- HL2MP idle crouch animation for pistol.
-ACT_HL2MP_IDLE_CROUCH_PISTOL = nil
-
---- HL2MP walking crouch animation for pistol.
-ACT_HL2MP_WALK_CROUCH_PISTOL = nil
-
---- HL2MP gesture for range attack with pistol.
-ACT_HL2MP_GESTURE_RANGE_ATTACK_PISTOL = nil
-
---- HL2MP gesture for melee attack with pistol.
-ACT_HL2MP_GESTURE_MELEE_ATTACK_PISTOL = nil
-
---- HL2MP gesture for reload with pistol.
-ACT_HL2MP_GESTURE_RELOAD_PISTOL = nil
-
---- HL2MP idle animation for SMG.
-ACT_HL2MP_IDLE_SMG1 = nil
-
---- HL2MP running animation for SMG.
-ACT_HL2MP_RUN_SMG1 = nil
-
---- HL2MP walking animation for SMG.
-ACT_HL2MP_WALK_SMG1 = nil
-
---- HL2MP jumping animation for SMG.
-ACT_HL2MP_JUMP_SMG1 = nil
-
---- HL2MP idle crouch animation for SMG.
-ACT_HL2MP_IDLE_CROUCH_SMG1 = nil
-
---- HL2MP walking crouch animation for SMG.
-ACT_HL2MP_WALK_CROUCH_SMG1 = nil
-
---- HL2MP gesture for range attack with SMG.
-ACT_HL2MP_GESTURE_RANGE_ATTACK_SMG1 = nil
-
---- HL2MP gesture for melee attack with SMG.
-ACT_HL2MP_GESTURE_MELEE_ATTACK_SMG1 = nil
-
---- HL2MP gesture for reload with SMG.
-ACT_HL2MP_GESTURE_RELOAD_SMG1 = nil
-
---- HL2MP idle animation for AR2.
-ACT_HL2MP_IDLE_AR2 = nil
-
---- HL2MP running animation for AR2.
-ACT_HL2MP_RUN_AR2 = nil
-
---- HL2MP walking animation for AR2.
-ACT_HL2MP_WALK_AR2 = nil
-
---- HL2MP jumping animation for AR2.
-ACT_HL2MP_JUMP_AR2 = nil
-
---- HL2MP idle crouch animation for AR2.
-ACT_HL2MP_IDLE_CROUCH_AR2 = nil
-
---- HL2MP walking crouch animation for AR2.
-ACT_HL2MP_WALK_CROUCH_AR2 = nil
-
---- HL2MP gesture for range attack with AR2.
-ACT_HL2MP_GESTURE_RANGE_ATTACK_AR2 = nil
-
---- HL2MP gesture for melee attack with AR2.
-ACT_HL2MP_GESTURE_MELEE_ATTACK_AR2 = nil
-
---- HL2MP gesture for reload with AR2.
-ACT_HL2MP_GESTURE_RELOAD_AR2 = nil
-
---- HL2MP idle animation for shotgun.
-ACT_HL2MP_IDLE_SHOTGUN = nil
-
---- HL2MP running animation for shotgun.
-ACT_HL2MP_RUN_SHOTGUN = nil
-
---- HL2MP walking animation for shotgun.
-ACT_HL2MP_WALK_SHOTGUN = nil
-
---- HL2MP jumping animation for shotgun.
-ACT_HL2MP_JUMP_SHOTGUN = nil
-
---- HL2MP idle crouch animation for shotgun.
-ACT_HL2MP_IDLE_CROUCH_SHOTGUN = nil
-
---- HL2MP walking crouch animation for shotgun.
-ACT_HL2MP_WALK_CROUCH_SHOTGUN = nil
-
---- HL2MP gesture for range attack with shotgun.
-ACT_HL2MP_GESTURE_RANGE_ATTACK_SHOTGUN = nil
-
---- HL2MP gesture for melee attack with shotgun.
-ACT_HL2MP_GESTURE_MELEE_ATTACK_SHOTGUN = nil
-
---- HL2MP gesture for reload with shotgun.
-ACT_HL2MP_GESTURE_RELOAD_SHOTGUN = nil
-
---- HL2MP idle animation for RPG.
-ACT_HL2MP_IDLE_RPG = nil
-
---- HL2MP running animation for RPG.
-ACT_HL2MP_RUN_RPG = nil
-
---- HL2MP walking animation for RPG.
-ACT_HL2MP_WALK_RPG = nil
-
---- HL2MP jumping animation for RPG.
-ACT_HL2MP_JUMP_RPG = nil
-
---- HL2MP idle crouch animation for RPG.
-ACT_HL2MP_IDLE_CROUCH_RPG = nil
-
---- HL2MP walking crouch animation for RPG.
-ACT_HL2MP_WALK_CROUCH_RPG = nil
-
---- HL2MP gesture for range attack with RPG.
-ACT_HL2MP_GESTURE_RANGE_ATTACK_RPG = nil
-
---- HL2MP gesture for melee attack with RPG.
-ACT_HL2MP_GESTURE_MELEE_ATTACK_RPG = nil
-
---- HL2MP gesture for reload with RPG.
-ACT_HL2MP_GESTURE_RELOAD_RPG = nil
-
---- HL2MP idle animation for grenade.
-ACT_HL2MP_IDLE_GRENADE = nil
-
---- HL2MP running animation for grenade.
-ACT_HL2MP_RUN_GRENADE = nil
-
---- HL2MP walking animation for grenade.
-ACT_HL2MP_WALK_GRENADE = nil
-
---- HL2MP jumping animation for grenade.
-ACT_HL2MP_JUMP_GRENADE = nil
-
---- HL2MP idle crouch animation for grenade.
-ACT_HL2MP_IDLE_CROUCH_GRENADE = nil
-
---- HL2MP walking crouch animation for grenade.
-ACT_HL2MP_WALK_CROUCH_GRENADE = nil
-
---- HL2MP gesture for range attack with grenade.
-ACT_HL2MP_GESTURE_RANGE_ATTACK_GRENADE = nil
-
---- HL2MP gesture for melee attack with grenade.
-ACT_HL2MP_GESTURE_MELEE_ATTACK_GRENADE = nil
-
---- HL2MP gesture for reload with grenade.
-ACT_HL2MP_GESTURE_RELOAD_GRENADE = nil
-
---- HL2MP idle animation for crossbow.
-ACT_HL2MP_IDLE_CROSSBOW = nil
-
---- HL2MP running animation for crossbow.
-ACT_HL2MP_RUN_CROSSBOW = nil
-
---- HL2MP walking animation for crossbow.
-ACT_HL2MP_WALK_CROSSBOW = nil
-
---- HL2MP jumping animation for crossbow.
-ACT_HL2MP_JUMP_CROSSBOW = nil
-
---- HL2MP idle crouch animation for crossbow.
-ACT_HL2MP_IDLE_CROUCH_CROSSBOW = nil
-
---- HL2MP walking crouch animation for crossbow.
-ACT_HL2MP_WALK_CROUCH_CROSSBOW = nil
-
---- HL2MP gesture for range attack with crossbow.
-ACT_HL2MP_GESTURE_RANGE_ATTACK_CROSSBOW = nil
-
---- HL2MP gesture for melee attack with crossbow.
-ACT_HL2MP_GESTURE_MELEE_ATTACK_CROSSBOW = nil
-
---- HL2MP gesture for reload with crossbow.
-ACT_HL2MP_GESTURE_RELOAD_CROSSBOW = nil
-
---- HL2MP idle animation for crowbar.
-ACT_HL2MP_IDLE_CROWBAR = nil
-
---- HL2MP running animation for crowbar.
-ACT_HL2MP_RUN_CROWBAR = nil
-
---- HL2MP walking animation for crowbar.
-ACT_HL2MP_WALK_CROWBAR = nil
-
---- HL2MP jumping animation for crowbar.
-ACT_HL2MP_JUMP_CROWBAR = nil
-
---- HL2MP idle crouch animation for crowbar.
-ACT_HL2MP_IDLE_CROUCH_CROWBAR = nil
-
---- HL2MP walking crouch animation for crowbar.
-ACT_HL2MP_WALK_CROUCH_CROWBAR = nil
-
---- HL2MP gesture for range attack with crowbar.
-ACT_HL2MP_GESTURE_RANGE_ATTACK_CROWBAR = nil
-
---- HL2MP gesture for melee attack with crowbar.
-ACT_HL2MP_GESTURE_MELEE_ATTACK_CROWBAR = nil
-
---- HL2MP gesture for reload with crowbar.
-ACT_HL2MP_GESTURE_RELOAD_CROWBAR = nil
-
---- HL2MP idle animation for stunstick.
-ACT_HL2MP_IDLE_STUNSTICK = nil
-
---- HL2MP running animation for stunstick.
-ACT_HL2MP_RUN_STUNSTICK = nil
-
---- HL2MP walking animation for stunstick.
-ACT_HL2MP_WALK_STUNSTICK = nil
-
---- HL2MP jumping animation for stunstick.
-ACT_HL2MP_JUMP_STUNSTICK = nil
-
---- HL2MP idle crouch animation for stunstick.
-ACT_HL2MP_IDLE_CROUCH_STUNSTICK = nil
-
---- HL2MP walking crouch animation for stunstick.
-ACT_HL2MP_WALK_CROUCH_STUNSTICK = nil
-
---- HL2MP gesture for range attack with stunstick.
-ACT_HL2MP_GESTURE_RANGE_ATTACK_STUNSTICK = nil
-
---- HL2MP gesture for melee attack with stunstick.
-ACT_HL2MP_GESTURE_MELEE_ATTACK_STUNSTICK = nil
-
---- HL2MP gesture for reload with stunstick.
-ACT_HL2MP_GESTURE_RELOAD_STUNSTICK = nil
-
---- HL2MP idle animation for melee.
-ACT_HL2MP_IDLE_MELEE = nil
-
---- HL2MP running animation for melee.
-ACT_HL2MP_RUN_MELEE = nil
-
---- HL2MP walking animation for melee.
-ACT_HL2MP_WALK_MELEE = nil
-
---- HL2MP jumping animation for melee.
-ACT_HL2MP_JUMP_MELEE = nil
-
---- HL2MP idle crouch animation for melee.
-ACT_HL2MP_IDLE_CROUCH_MELEE = nil
-
---- HL2MP walking crouch animation for melee.
-ACT_HL2MP_WALK_CROUCH_MELEE = nil
-
---- HL2MP gesture for range attack with melee.
-ACT_HL2MP_GESTURE_RANGE_ATTACK_MELEE = nil
-
---- HL2MP gesture for melee attack with melee.
-ACT_HL2MP_GESTURE_MELEE_ATTACK_MELEE = nil
-
---- HL2MP gesture for reload with melee.
-ACT_HL2MP_GESTURE_RELOAD_MELEE = nil
-
---- HL2MP idle animation for slam.
-ACT_HL2MP_IDLE_SLAM = nil
-
---- HL2MP running animation for slam.
-ACT_HL2MP_RUN_SLAM = nil
-
---- HL2MP walking animation for slam.
-ACT_HL2MP_WALK_SLAM = nil
-
---- HL2MP jumping animation for slam.
-ACT_HL2MP_JUMP_SLAM = nil
-
---- HL2MP idle crouch animation for slam.
-ACT_HL2MP_IDLE_CROUCH_SLAM = nil
-
---- HL2MP walking crouch animation for slam.
-ACT_HL2MP_WALK_CROUCH_SLAM = nil
-
---- HL2MP gesture for range attack with slam.
-ACT_HL2MP_GESTURE_RANGE_ATTACK_SLAM = nil
-
---- HL2MP gesture for melee attack with slam.
-ACT_HL2MP_GESTURE_MELEE_ATTACK_SLAM = nil
-
---- HL2MP gesture for reload with slam.
-ACT_HL2MP_GESTURE_RELOAD_SLAM = nil
-
---- HL2MP idle animation for physgun.
-ACT_HL2MP_IDLE_PHYSGUN = nil
-
---- HL2MP running animation for physgun.
-ACT_HL2MP_RUN_PHYSGUN = nil
-
---- HL2MP walking animation for physgun.
-ACT_HL2MP_WALK_PHYSGUN = nil
-
---- HL2MP jumping animation for physgun.
-ACT_HL2MP_JUMP_PHYSGUN = nil
-
---- HL2MP idle crouch animation for physgun.
-ACT_HL2MP_IDLE_CROUCH_PHYSGUN = nil
-
---- HL2MP walking crouch animation for physgun.
-ACT_HL2MP_WALK_CROUCH_PHYSGUN = nil
-
---- HL2MP gesture for range attack with physgun.
-ACT_HL2MP_GESTURE_RANGE_ATTACK_PHYSGUN = nil
-
---- HL2MP gesture for melee attack with physgun.
-ACT_HL2MP_GESTURE_MELEE_ATTACK_PHYSGUN = nil
-
---- HL2MP gesture for reload with physgun.
-ACT_HL2MP_GESTURE_RELOAD_PHYSGUN = nil
-
--- end activities
+--- global INVALID_PANEL value
+INVALID_PANEL = nil

@@ -29,7 +29,6 @@ end
 local function OnOpenContentDialog()
     if ( ToPanel( hContentDialog ) == INVALID_PANEL ) then
         local parent = VGui_GetGameUIPanel()
-        if parent == INVALID_PANEL then parent = nil end -- <--- guard
         hContentDialog = vgui.CContentDialog(parent, "ContentDialog")
         PositionDialog( hContentDialog )
     end

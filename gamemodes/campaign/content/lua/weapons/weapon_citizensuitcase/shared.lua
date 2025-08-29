@@ -1,8 +1,10 @@
---========== Copyleft © 2010, Team Sandbox, Some rights reserved. ===========--
+--========== Copyleft ï¿½ 2010, Team Sandbox, Some rights reserved. ===========--
 --
 -- Purpose: 
 --
 --===========================================================================--
+
+include( "acttable.lua" )
 
 SWEP.__base					= "weapon_citizenpackage"
 
@@ -25,12 +27,15 @@ SWEP.secondary_ammo			= "None"
 SWEP.weight					= 0
 SWEP.item_flags				= 0
 
+SWEP.DrawCrosshair = true
+SWEP.DrawAmmo = false
+
 SWEP.SoundData				=
 {
 }
 
 SWEP.m_acttable				=
 {
-	{ 1,						309,					false },
-	{ 6,						310,					false },
+	{ ACT.IDLE,						ACT.GESTURE_RANGE_ATTACK_SMG2,					false },
+	{ ACT.WALK,						ACT.GESTURE_RANGE_ATTACK_SHOTGUN,					false },
 };
