@@ -6,13 +6,13 @@ Waltenthethird - Helping fix thirdperson animations
 Ashforever - Provider of fixed GMod models
 MrDinnerMau5 - Supporter, advertising
 Graman/Carl - Suggestions
-ItzVladik - Contributor, the one who allowed me to use his mov_ convars from GunMod
 
 CONTRIBUTORS
 Nazaret - initial Lua NextBot implementation 
 hahayoutookind - Russian translation
 Kokoleong - Fancy hat
 R_4d - Fancy hat..again
+ItzVladik - Contributor, the one who allowed me to use his mov_ convars from GunMod
 
 PLAYTESTERS
 Inflesi
